@@ -1,0 +1,17 @@
+@import "./tailwind/_base.css";
+@import "./tailwind/_components.css";
+@import "./tailwind/_utilities.css";
+
+@import "./_checkbox-radio-switch.css";
+@import "./_progress.css";
+@import "./_scrollbars.css";
+@import "./_table.css";
+
+@import "./styles/_basic.css";
+@import "./styles/_white.css";
+
+/* Import Flowbite AFTER your custom styles to prevent conflicts */
+@import "flowbite/src/themes/default";
+@source "../node_modules/flowbite";
+
+@config '../../tailwind.config.js';
