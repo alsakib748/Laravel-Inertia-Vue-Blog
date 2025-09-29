@@ -28,12 +28,14 @@ const form = useForm({
 })
 
 // File uploads
-const handleFile = (e, file) => {
+const handleFile = (e, field) => {
     form[field] = e.target.files[0]
 }
 
 function submit() {
-    form.post(route('posts.store'))
+    form.post(route('posts.store'), {
+        forceFormData: true,
+    })
 }
 
 </script>
@@ -57,7 +59,7 @@ function submit() {
 
                 <div class="">
 
-                    <form @submit.prevent="submit">
+                    <form @submit.prevent="submit" enctype="multipart/form-data">
                         <div class="">
                             <!-- <div class="mb-6">
                                 <label for="name"
@@ -80,14 +82,14 @@ function submit() {
                             </div>
 
                             <!-- Slug -->
-                            <div class="mb-6">
+                            <!-- <div class="mb-6">
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Slug</label>
                                 <input v-model="form.slug" type="text"
                                     class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                     placeholder="auto-generated or edit" />
                                 <div v-if="form.errors.slug" class="text-red-600 text-sm mt-1">{{ form.errors.slug }}
                                 </div>
-                            </div>
+                            </div> -->
 
                             <!-- Excerpt -->
                             <div class="mb-6">
@@ -97,7 +99,7 @@ function submit() {
                                     class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                     placeholder="Short summary"></textarea>
                                 <div v-if="form.errors.excerpt" class="text-red-600 text-sm mt-1">{{ form.errors.excerpt
-                                    }}</div>
+                                }}</div>
                             </div>
 
                             <!-- Content -->

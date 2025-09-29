@@ -10,10 +10,12 @@ use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use PHPUnit\Event\Test\PostConditionCalled;
+use Intervention\Image\Laravel\Facades\Image;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 
 class PostController extends Controller
 {
-
 
     public function index()
     {
@@ -33,74 +35,119 @@ class PostController extends Controller
 
     public function store(Request $request)
     {
-        // dd($request->all());
-
         $request->validate([
-            'name' => 'required|string|max:255|unique:categories,name',
-            'description' => 'nullable|string|max:5000', // Increased for rich text content
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'title' => 'required|string|max:255',
+            'category_id' => 'required|exists:categories,id',
+            'content' => 'required|string',
+            'status' => 'required|in:draft,pending,published,archived,deleted',
+            'published_at' => 'nullable|date',
+            'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        $category = new Post();
-        $category->name = $request->name;
-        $category->slug = Str::slug($request->name);
-        $category->description = $request->description;
+        $baseUrl = request()->getSchemeAndHttpHost();
+        $imagePath = public_path('/backend/images/posts/');
+        $thumbnailPath = public_path('/backend/images/posts/thumbnails/');
+
+        if (!file_exists($imagePath)) {
+            mkdir($imagePath, 0755, true);
+        }
+
+        if (!file_exists($thumbnailPath)) {
+            mkdir($thumbnailPath, 0755, true);
+        }
+
+        $imageName = uniqid() . '.jpg';
+        $thumbnailName = 'thumb_' . $imageName;
 
         // Handle image upload
         if ($request->hasFile('image')) {
-            $baseUrl = request()->getSchemeAndHttpHost();
             $image = $request->file('image');
-            $imageName = uniqid() . '.' . $image->getClientOriginalExtension();
-            $path = public_path('/backend/images/category/');
-            $image->move($path, $imageName);
-            $fullImageName = $baseUrl . '/backend/images/category/' . $imageName;
-            $category->image = $fullImageName;
+            $manager = new ImageManager(new Driver());
+
+            $originalImage = $manager->read($image);
+            $originalImage->scaleDown(1200)
+                ->toJpeg(90)
+                ->save($imagePath . $imageName);
+
+            // $image->move($imagePath, $imageName);
+            $fullImageUrl = $baseUrl . '/backend/images/posts/' . $imageName;
         }
 
-        $category->save();
+        // Process thumbnail
+        if ($request->hasFile('thumbnail')) {
+            $thumbnail = $request->file('thumbnail');
+            $manager = new ImageManager(new Driver());
+
+            // Create thumbnail (300x200, fit and crop)
+            $thumbnailImage = $manager->read($thumbnail);
+            $thumbnailImage->cover(300, 200)
+                ->toJpeg(85)
+                ->save($thumbnailPath . $thumbnailName);
+
+            $fullThumbnailUrl = $baseUrl . '/backend/images/posts/thumbnails/' . $thumbnailName;
+        }
+
+        $post = Post::create([
+            'user_id' => auth()->id(),
+            'category_id' => $request->category_id,
+            'title' => $request->title,
+            'slug' => Str::slug($request->title) . '-' . uniqid(),
+            'excerpt' => $request->excerpt,
+            'content' => $request->content,
+            'status' => $request->status,
+            'published_at' => $request->published_at ? \Carbon\Carbon::parse($request->published_at) : ($request->status === 'published' ? now() : null),
+            'thumbnail' => $fullThumbnailUrl ?? null,
+            'image' => $fullImageUrl ?? null,
+            'is_featured' => $request->boolean('is_featured'),
+            'meta' => $request->meta ? json_decode($request->meta, true) : null,
+            'active' => $request->boolean('active', true),
+        ]);
+
+        $post->tags()->sync($request->tags ?? []);
 
         return redirect()->route('posts.index')->with('success', 'Post created successfully!');
     }
-
 
     public function show(string $id)
     {
         //
     }
 
-
-    public function edit($id)
+    public function edit(Post $post)
     {
-
         // dd($id);
-
-        $post = Post::find($id);
-
-        return Inertia::render('backend/pages/posts/Edit', compact('post'));
+        // $post = Post::find($id);
+        return Inertia::render('backend/pages/posts/Edit', [
+            'post' => $post->load('tags'),
+            'categories' => Category::all(),
+            'tags' => Tag::all(),
+        ]);
     }
 
-
-    public function update(Request $request, Post $category)
+    public function update(Request $request, Post $post)
     {
-
-        // dd($request->all());
-
         $request->validate([
-            'name' => 'required|string|max:255|unique:categories,name,' . $category->id,
-            'description' => 'nullable|string', // Increased for rich text content
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'title' => 'required|max:255',
+            'category_id' => 'required|exists:categories,id',
+            'content' => 'required',
+            'status' => 'required|in:draft,pending,published,archived,deleted',
+            'published_at' => 'nullable|date',
         ]);
 
-        $category = Post::find($request->id);
-        $category->name = $request->name;
-        $category->slug = Str::slug($request->name);
-        $category->description = $request->description;
+        $baseUrl = request()->getSchemeAndHttpHost();
+        $imagePath = public_path('/backend/images/posts/');
+        $thumbnailPath = public_path('/backend/images/posts/thumbnails/');
+
+        $imageName = uniqid() . '.jpg';
+        $thumbnailName = 'thumb_' . $imageName;
 
         // Handle image upload
         if ($request->hasFile('image')) {
-            // Safely delete old image if it's a local file
-            if (!empty($category->image)) {
-                $oldPathFromUrl = parse_url($category->image, PHP_URL_PATH);
+
+            // Safely delete existing image if stored as URL
+            if (!empty($post->image)) {
+                $oldPathFromUrl = parse_url($post->image, PHP_URL_PATH);
                 if ($oldPathFromUrl) {
                     $oldFullPath = public_path($oldPathFromUrl);
                     if (file_exists($oldFullPath)) {
@@ -108,24 +155,83 @@ class PostController extends Controller
                     }
                 }
             }
-            $baseUrl = request()->getSchemeAndHttpHost();
+
             $image = $request->file('image');
-            $imageName = uniqid() . '.' . $image->getClientOriginalExtension();
-            $path = public_path('/backend/images/category/');
-            $image->move($path, $imageName);
-            $fullImageName = $baseUrl . '/backend/images/category/' . $imageName;
-            $category->image = $fullImageName;
+            $manager = new ImageManager(new Driver());
+
+            $originalImage = $manager->read($image);
+            $originalImage->scaleDown(1200)
+                ->toJpeg(90)
+                ->save($imagePath . $imageName);
+
+            $fullImageUrl = $baseUrl . '/backend/images/posts/' . $imageName;
+        } else {
+            $fullImageUrl = $post->image;
         }
 
-        $category->save();
+        // Process thumbnail
+        if ($request->hasFile('thumbnail')) {
+
+            // Safely delete existing thumbnail if stored as URL
+            if (!empty($post->thumbnail)) {
+                $oldThumbPathFromUrl = parse_url($post->thumbnail, PHP_URL_PATH);
+                if ($oldThumbPathFromUrl) {
+                    $oldThumbFullPath = public_path($oldThumbPathFromUrl);
+                    if (file_exists($oldThumbFullPath)) {
+                        @unlink($oldThumbFullPath);
+                    }
+                }
+            }
+
+            $thumbnail = $request->file('thumbnail');
+            $manager = new ImageManager(new Driver());
+
+            // Create thumbnail (300x200, fit and crop)
+            $thumbnailImage = $manager->read($thumbnail);
+            $thumbnailImage->cover(300, 200)
+                ->toJpeg(85)
+                ->save($thumbnailPath . $thumbnailName);
+
+            $fullThumbnailUrl = $baseUrl . '/backend/images/posts/thumbnails/' . $thumbnailName;
+        } else {
+            $fullThumbnailUrl = $post->thumbnail;
+        }
+
+        $post->update([
+            'category_id' => $request->category_id,
+            'title' => $request->title,
+            'slug' => Str::slug($request->title) . '-' . $post->id,
+            'excerpt' => $request->excerpt,
+            'content' => $request->content,
+            'status' => $request->status,
+            'published_at' => $request->published_at ? \Carbon\Carbon::parse($request->published_at) : ($request->status === 'published' ? now() : null),
+            'thumbnail' => $fullThumbnailUrl,
+            'image' => $fullImageUrl,
+            'is_featured' => $request->boolean('is_featured'),
+            'meta' => $request->meta ? json_decode($request->meta, true) : null,
+            'active' => $request->boolean('active', true),
+        ]);
+
+        $post->tags()->sync($request->tags ?? []);
 
         return redirect()->route('posts.index')->with('success', 'Post updated successfully!');
     }
 
 
-    public function destroy(string $id)
+    public function destroy(Post $post)
     {
-        $post = Post::findOrFail($id);
+        // $post = Post::findOrFail($id);
+
+        // Safely delete existing thumbnail if stored as URL
+        if (!empty($post->thumbnail)) {
+            $oldThumbPathFromUrl = parse_url($post->thumbnail, PHP_URL_PATH);
+            if ($oldThumbPathFromUrl) {
+                $oldThumbFullPath = public_path($oldThumbPathFromUrl);
+                if (file_exists($oldThumbFullPath)) {
+                    @unlink($oldThumbFullPath);
+                }
+            }
+        }
 
         // Safely delete old image if stored
         if (!empty($post->image)) {
