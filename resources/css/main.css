@@ -10,8 +10,30 @@
 @import "./styles/_basic.css";
 @import "./styles/_white.css";
 
-/* Import Flowbite AFTER your custom styles to prevent conflicts */
-@import "flowbite/src/themes/default";
-@source "../node_modules/flowbite";
+/* Import custom frontend styles with high specificity */
 
-@config '../../tailwind.config.js';
+/* Travel Post Items Enhancement */
+.travel-post-item {
+    border: 1px solid #e5e7eb;
+    transition: all 0.3s ease-in-out;
+}
+
+.travel-post-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1),
+        0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.travel-post-item .line-clamp-2 {
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+}
+
+.travel-post-item .line-clamp-3 {
+    display: -webkit-box !important;
+    -webkit-line-clamp: 3 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+}

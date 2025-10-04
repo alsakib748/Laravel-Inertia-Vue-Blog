@@ -1,5 +1,8 @@
 import "../css/main.css";
+import "./frontend/assets/css/style.css";
 import "./bootstrap.js";
+import "flowbite";
+import { initFlowbite } from "flowbite";
 
 import { createPinia } from "pinia";
 // import { useDarkModeStore } from '@/stores/darkMode.js'
@@ -53,7 +56,7 @@ createInertiaApp({
         );
     },
     setup({ el, App, props, plugin }) {
-        return createApp({ render: () => h(App, props) })
+        const app = createApp({ render: () => h(App, props) })
             .use(plugin)
             .use(pinia)
             .use(ZiggyVue, Ziggy)
@@ -62,8 +65,17 @@ createInertiaApp({
                 position: "top-right",
                 timeout: 3000,
                 closeOnClick: true,
-            })
-            .mount(el);
+            });
+
+        // Mount the app and initialize Flowbite
+        app.mount(el);
+
+        // Initialize Flowbite components after the app is mounted
+        setTimeout(() => {
+            initFlowbite();
+        }, 100);
+
+        return app;
     },
     progress: {
         color: "#4B5563",
@@ -72,7 +84,13 @@ createInertiaApp({
 
 // NProgress for Inertia navigations
 router.on("start", () => NProgress.start());
-router.on("finish", () => NProgress.done());
+router.on("finish", () => {
+    NProgress.done();
+    // Re-initialize Flowbite components after each navigation
+    setTimeout(() => {
+        initFlowbite();
+    }, 100);
+});
 
 // const darkModeStore = useDarkModeStore(pinia)
 
