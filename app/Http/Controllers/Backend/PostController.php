@@ -100,6 +100,8 @@ class PostController extends Controller
             'thumbnail' => $fullThumbnailUrl ?? null,
             'image' => $fullImageUrl ?? null,
             'is_featured' => $request->boolean('is_featured'),
+            'is_trending' => $request->boolean('is_trending'),
+            'is_slider' => $request->boolean('is_slider'),
             'meta' => $request->meta ? json_decode($request->meta, true) : null,
             'active' => $request->boolean('active', true),
         ]);
@@ -208,6 +210,8 @@ class PostController extends Controller
             'thumbnail' => $fullThumbnailUrl,
             'image' => $fullImageUrl,
             'is_featured' => $request->boolean('is_featured'),
+            'is_trending' => $request->boolean('is_trending'),
+            'is_slider' => $request->boolean('is_slider'),
             'meta' => $request->meta ? json_decode($request->meta, true) : null,
             'active' => $request->boolean('active', true),
         ]);

@@ -9,6 +9,11 @@ class Post extends Model
 
     protected $guarded = [];
 
+    public function scopeActive($query)
+    {
+        return $query->where('active', 1);
+    }
+
     // Relationships
     public function category()
     {

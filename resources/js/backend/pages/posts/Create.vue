@@ -25,6 +25,9 @@ const form = useForm({
     published_at: '',
     thumbnail: null,
     image: null,
+    is_featured: false,
+    is_trending: false,
+    is_slider: false,
 })
 
 // File uploads
@@ -183,6 +186,35 @@ function submit() {
                                     Image</label>
                                 <input type="file" @change="e => handleFile(e, 'image')"
                                     class="mt-1 block w-full text-sm text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
+                            </div>
+
+                            <div class="mb-6 flex items-center justify-between w-full">
+
+                                <div class="flex items-center me-4">
+                                    <input id="purple-checkbox" type="checkbox" value="1" v-model="form.is_featured"
+                                        class="w-4 h-4 text-purple-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-purple-500 dark:focus:ring-purple-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+                                    <label for="purple-checkbox"
+                                        class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">Is
+                                        Featured</label>
+                                </div>
+                                <div class="flex items-center me-4">
+                                    <input id="teal-checkbox" type="checkbox" value="1" v-model="form.is_trending"
+                                        class="w-4 h-4 text-teal-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-teal-500 dark:focus:ring-teal-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+                                    <label for="teal-checkbox"
+                                        class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">Is
+                                        Trending</label>
+                                </div>
+
+                                <div class="flex items-center me-4">
+                                    <input id="orange-checkbox" type="checkbox" value="1" v-model="form.is_slider"
+                                        class=" w-4 h-4 text-orange-500 bg-gray-100 border-gray-300 rounded-sm
+                                        focus:ring-orange-500 dark:focus:ring-orange-600 dark:ring-offset-gray-800
+                                        focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+                                    <label for="orange-checkbox"
+                                        class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">Is
+                                        Slider</label>
+                                </div>
+
                             </div>
 
                             <!-- <div class="mb-6">

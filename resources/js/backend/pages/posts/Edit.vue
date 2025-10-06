@@ -33,6 +33,9 @@ const form = useForm({
     published_at: toLocalDateTimeInput(props.post.published_at) || '',
     thumbnail: null,
     image: null,
+    is_featured: +props.post.is_featured || false,
+    is_trending: +props.post.is_trending || false,
+    is_slider: +props.post.is_slider || false,
 })
 
 const handleFile = (e, field) => {
@@ -125,7 +128,7 @@ function submit() {
                                 <textarea v-model="form.excerpt" rows="3"
                                     class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"></textarea>
                                 <div v-if="form.errors.excerpt" class="text-red-600 text-sm mt-1">{{ form.errors.excerpt
-                                }}</div>
+                                    }}</div>
                             </div>
 
                             <div class="mb-6">
@@ -209,6 +212,37 @@ function submit() {
                                     <img :src="props.post.image" alt="Current main image"
                                         class="w-48 h-32 object-cover rounded-lg border border-gray-300 dark:border-gray-600" />
                                 </div>
+                            </div>
+
+                            <div class="mb-6 flex items-center justify-between w-full">
+
+                                <div class="flex items-center me-4">
+                                    <input id="purple-checkbox" type="checkbox" v-model="form.is_featured"
+                                        :true-value="1" :false-value="0"
+                                        class="w-4 h-4 text-purple-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-purple-500 dark:focus:ring-purple-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+                                    <label for="purple-checkbox"
+                                        class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">Is
+                                        Featured</label>
+                                </div>
+                                <div class="flex items-center me-4">
+                                    <input id="teal-checkbox" type="checkbox" v-model="form.is_trending" :true-value="1"
+                                        :false-value="0"
+                                        class="w-4 h-4 text-teal-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-teal-500 dark:focus:ring-teal-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+                                    <label for="teal-checkbox"
+                                        class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">Is
+                                        Trending</label>
+                                </div>
+
+                                <div class="flex items-center me-4">
+                                    <input id="orange-checkbox" type="checkbox" v-model="form.is_slider" :true-value="1"
+                                        :false-value="0" class=" w-4 h-4 text-orange-500 bg-gray-100 border-gray-300 rounded-sm
+                                        focus:ring-orange-500 dark:focus:ring-orange-600 dark:ring-offset-gray-800
+                                        focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+                                    <label for="orange-checkbox"
+                                        class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">Is
+                                        Slider</label>
+                                </div>
+
                             </div>
 
                         </div>

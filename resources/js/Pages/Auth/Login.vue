@@ -15,115 +15,70 @@ import NotificationBarInCard from '@/components/NotificationBarInCard.vue'
 import BaseLevel from '@/components/BaseLevel.vue'
 
 const props = defineProps({
-  canResetPassword: Boolean,
-  status: {
-    type: String,
-    default: null
-  }
+    canResetPassword: Boolean,
+    status: {
+        type: String,
+        default: null
+    }
 })
 
 const form = useForm({
-  email: '',
-  password: '',
-  remember: []
+    email: '',
+    password: '',
+    remember: []
 })
 
 const submit = () => {
-  form
-    .transform(data => ({
-      ... data,
-      remember: form.remember && form.remember.length ? 'on' : ''
-    }))
-    .post(route('login'), {
-      onFinish: () => form.reset('password'),
-    })
+    form
+        .transform(data => ({
+            ...data,
+            remember: form.remember && form.remember.length ? 'on' : ''
+        }))
+        .post('/login', {
+            onFinish: () => form.reset('password'),
+        })
 }
 </script>
 
 <template>
-  <LayoutGuest>
-    <Head title="Login" />
+    <LayoutGuest>
 
-    <SectionFullScreen
-      v-slot="{ cardClass }"
-      bg="purplePink"
-    >
-      <CardBox
-        :class="cardClass"
-        is-form
-        @submit.prevent="submit"
-      >
-        <FormValidationErrors />
+        <Head title="Login" />
 
-        <NotificationBarInCard 
-          v-if="status"
-          color="info"
-        >
-          {{ status }}
-        </NotificationBarInCard>
+        <SectionFullScreen v-slot="{ cardClass }" bg="purplePink">
+            <CardBox :class="cardClass" is-form @submit.prevent="submit">
+                <FormValidationErrors />
 
-        <FormField
-          label="Email"
-          label-for="email"
-          help="Please enter your email"
-        >
-          <FormControl
-            v-model="form.email"
-            :icon="mdiAccount"
-            id="email"
-            autocomplete="email"
-            type="email"
-            required
-          />
-        </FormField>
+                <NotificationBarInCard v-if="status" color="info">
+                    {{ status }}
+                </NotificationBarInCard>
 
-        <FormField
-          label="Password"
-          label-for="password"
-          help="Please enter your password"
-        >
-          <FormControl
-            v-model="form.password"
-            :icon="mdiAsterisk"
-            type="password"
-            id="password"
-            autocomplete="current-password"
-            required
-          />
-        </FormField>
+                <FormField label="Email" label-for="email" help="Please enter your email">
+                    <FormControl v-model="form.email" :icon="mdiAccount" id="email" autocomplete="email" type="email"
+                        required />
+                </FormField>
 
-        <FormCheckRadioGroup
-          v-model="form.remember"
-          name="remember"
-          :options="{ remember: 'Remember' }"
-        />
+                <FormField label="Password" label-for="password" help="Please enter your password">
+                    <FormControl v-model="form.password" :icon="mdiAsterisk" type="password" id="password"
+                        autocomplete="current-password" required />
+                </FormField>
 
-        <BaseDivider />
+                <FormCheckRadioGroup v-model="form.remember" name="remember" :options="{ remember: 'Remember' }" />
 
-        <BaseLevel>
-          <BaseButtons>
-            <BaseButton
-              type="submit"
-              color="info"
-              label="Login"
-              :class="{ 'opacity-25': form.processing }"
-              :disabled="form.processing"
-            />
-            <BaseButton
-              v-if="canResetPassword"
-              route-name="password.request"
-              color="info"
-              outline
-              label="Remind"
-            />
-          </BaseButtons>
-          <Link
-            :href="route('register')"
-          >
-            Register
-          </Link>
-        </BaseLevel>
-      </CardBox>
-    </SectionFullScreen>
-  </LayoutGuest>
+                <BaseDivider />
+
+                <BaseLevel>
+                    <BaseButtons>
+                        <BaseButton type="submit" color="info" label="Login" :class="{ 'opacity-25': form.processing }"
+                            :disabled="form.processing" />
+                        <BaseButton v-if="canResetPassword" route-name="password.request" color="info" outline
+                            label="Remind" />
+                    </BaseButtons>
+                    <Link href="/register">
+                    Register
+                    </Link>
+                </BaseLevel>
+            </CardBox>
+        </SectionFullScreen>
+    </LayoutGuest>
 </template>

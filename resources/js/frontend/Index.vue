@@ -4,11 +4,24 @@ import hero1 from "./assets/images/hero-slider/banner-slider.jpg"
 import featuredBlog1 from "./assets/images/featured-blog/banner-item-1.jpg"
 import featuredBlog2 from "./assets/images/featured-blog/banner-item-2.jpg"
 
-import { Head, Link } from "@inertiajs/vue3";
+import { Head, Link, usePage } from "@inertiajs/vue3";
 
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted, computed } from "vue";
 
 import Layout from "./Layout.vue";
+
+import dayjs from 'dayjs';
+
+import relativeTime from 'dayjs/plugin/relativeTime';
+
+dayjs.extend(relativeTime);
+
+function formatPublishedAt(published, updated) {
+    if (!published) return ''
+    const formattedDate = dayjs(published).format('MMMM D, YYYY')
+    const updatedText = updated ? `, Updated ${dayjs(updated).fromNow()}` : ''
+    return formattedDate + updatedText
+}
 
 // Slider state
 const currentSlide = ref(0);
@@ -82,6 +95,10 @@ onMounted(() => {
 
 const mobileOpen = ref(false);
 const toggleMobile = () => (mobileOpen.value = !mobileOpen.value);
+
+const page = usePage();
+
+const sliderPosts = computed(() => page.props.sliderPosts ?? []);
 
 </script>
 
@@ -165,32 +182,35 @@ const toggleMobile = () => (mobileOpen.value = !mobileOpen.value);
                         <!-- Carousel wrapper -->
                         <div class="relative h-56 overflow-hidden md:h-90 lg:h-120">
                             <!-- Item 1 -->
-                            <div class="hidden duration-700 ease-in-out home-slider-inner z-[300]" data-carousel-item>
-                                <img src="./assets/images/hero-slider/banner-item-1.jpg"
+                            <div v-for="post in sliderPosts" :key="post?.id"
+                                class="hidden duration-700 ease-in-out home-slider-inner z-[300]" data-carousel-item>
+                                <img :src="post?.image"
                                     class="absolute block w-full h-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2"
-                                    alt="..." />
+                                    :alt="post?.title" />
 
                                 <div class="absolute inset-0 bg-black/40 flex items-center px-4 md:px-12">
                                     <div class="grid grid-cols-1 md:grid-cols-12 items-center z-[400]">
                                         <div class="col-span-1 md:col-span-10 lg:col-span-8 md:p-6 text-white">
                                             <h5 class="text-white text-sm md:text-md py-1 md:py-1">
-                                                February 21, 2018 , Updated 3 hours ago
+                                                <!-- February 21, 2018 , Updated 3 hours ago -->
+                                                <!-- {{ post?.published_at ? new
+                                                    Date(post?.published_at).toLocaleDateString() : '' }} -->
+                                                {{ formatPublishedAt(post.published_at, post.updated_at) }}
                                             </h5>
                                             <h2
                                                 class="hover:text-indigo-600 text-sm md:text-md md:text-2xl lg:text-5xl py-1 md:py-4">
                                                 <a href="jabascript:void(0)" class="hover:text-indigo-600 font-bold">
-                                                    Lorem Ipsum is simply dummy text of the printing.
+                                                    {{ post?.title }}
                                                 </a>
                                             </h2>
                                             <p class="text-xs md:text-md py-1 md:py-2">
-                                                Lorem Ipsum has been the industry's standard dummy text
-                                                ever since the 1500s, when an unknown printer took a
-                                                galley of type and scrambled it to make a type specimen
-                                                book.
+                                                {{ post?.excerpt }}
                                             </p>
                                             <div class="py-3 md:py-3">
                                                 <a href=""
-                                                    class="px-6 py-2 bg-indigo-600 border-none text-white text-xs md:text-sm outline-none rounded-full hover:bg-yellow-600 transition-all duration-300 ease-in-out">Investing</a>
+                                                    class="px-6 py-2 bg-indigo-600 border-none text-white text-xs md:text-sm outline-none rounded-full hover:bg-yellow-600 transition-all duration-300 ease-in-out">{{
+                                                        post?.category?.name }}
+                                                </a>
                                             </div>
                                         </div>
 
@@ -221,6 +241,7 @@ const toggleMobile = () => (mobileOpen.value = !mobileOpen.value);
                                     </div>
                                 </div>
                             </div>
+
                             <!-- Item 2 -->
                             <div class="hidden duration-700 ease-in-out home-slider-inner z-[300]" data-carousel-item>
                                 <img src="./assets/images/hero-slider/banner-item-2.jpg"

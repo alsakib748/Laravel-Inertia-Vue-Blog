@@ -24,6 +24,8 @@ return new class extends Migration {
             $table->string('image')->nullable();
             $table->integer('views')->default(0);
             $table->boolean('is_featured')->default(false);
+            $table->boolean('is_trending')->default(false);
+            $table->boolean('is_slider')->default(false);
             $table->json('meta')->nullable();
             $table->tinyInteger('active')->default(1);
             $table->timestamps();

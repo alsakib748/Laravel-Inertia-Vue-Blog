@@ -31,6 +31,7 @@
     "dependencies": {
         "@ckeditor/ckeditor5-build-classic": "^41.4.2",
         "@ckeditor/ckeditor5-vue": "^7.3.0",
+        "dayjs": "^1.11.18",
         "flowbite": "^3.1.2",
         "vue-toastification": "^2.0.0-rc.5"
     }

@@ -15,6 +15,10 @@ import { ZiggyVue } from "../../vendor/tightenco/ziggy/dist/index.esm.js";
 import { CkeditorPlugin } from "@ckeditor/ckeditor5-vue";
 import Toast from "vue-toastification";
 import "vue-toastification/dist/index.css";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+
+dayjs.extend(relativeTime);
 
 const appName =
     window.document.getElementsByTagName("title")[0]?.innerText || "Laravel";
@@ -30,28 +34,35 @@ createInertiaApp({
             ...import.meta.glob("./Pages/**/*.vue"),
         };
 
-        // Try exact match first (for nested paths like 'backend/pages/categories/Index')
-        if (pages[`./${name}.vue`]) {
-            return pages[`./${name}.vue`]();
-        }
+        const tryResolve = (candidate) =>
+            pages[candidate] ? pages[candidate]() : null;
 
-        const pathVariations = [
-            `./${name}.vue`,
-            `./backend/${name}.vue`,
-            `./frontend/${name}.vue`,
-            `./Pages/${name}.vue`,
+        // 1) Try exact match (handles names like 'frontend/About' or 'Pages/Login')
+        const exact = tryResolve(`./${name}.vue`);
+        if (exact) return exact;
+
+        // 2) Normalize the name to avoid double prefixes like 'Pages/Pages/Login'
+        const bareName = name
+            .replace(/^\.\//, "")
+            .replace(/^(backend|frontend|Pages)\//, "")
+            .replace(/\.vue$/, "");
+
+        // 3) Try common locations
+        const candidates = [
+            `./backend/${bareName}.vue`,
+            `./frontend/${bareName}.vue`,
+            `./Pages/${bareName}.vue`,
+            `./${bareName}.vue`,
         ];
 
-        for (const path of pathVariations) {
-            // if (pages[path]) return pages[path]();
-            if (pages[path]) {
-                return pages[path]();
-            }
+        for (const path of candidates) {
+            const resolved = tryResolve(path);
+            if (resolved) return resolved;
         }
 
-        // Fallback to default resolver to surface a meaningful error
+        // 4) Fallback to default resolver to surface a meaningful error
         return resolvePageComponent(
-            `./Pages/${name}.vue`,
+            `./Pages/${bareName}.vue`,
             import.meta.glob("./Pages/**/*.vue")
         );
     },

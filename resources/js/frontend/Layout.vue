@@ -1,7 +1,7 @@
 <script setup>
 
-import { Head, Link } from "@inertiajs/vue3";
-import { ref, onMounted, onUnmounted } from "vue";
+import { Head, Link, usePage } from "@inertiajs/vue3";
+import { ref, onMounted, onUnmounted, computed } from "vue";
 
 const mobileOpen = ref(false);
 const headerScrolled = ref(false);
@@ -19,6 +19,9 @@ onUnmounted(() => {
     window.removeEventListener('scroll', handleScroll);
 });
 
+const page = usePage();
+
+const categories = computed(() => page.props.categories ?? []);
 
 </script>
 
@@ -152,24 +155,12 @@ onUnmounted(() => {
                                         class="z-10 hidden font-normal bg-white divide-y divide-gray-100 rounded-lg shadow-md w-[93%] md:w-56 dark:bg-gray-700 dark:divide-gray-600">
                                         <ul class="py-2 text-sm text-gray-700 dark:text-gray-400"
                                             aria-labelledby="dropdownLargeButton">
-                                            <li>
+                                            <li v-for="(name, slug) in categories" :key="slug">
                                                 <a href="#"
-                                                    class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white sm:text-md text-lg">Dashboard</a>
-                                            </li>
-                                            <li>
-                                                <a href="#"
-                                                    class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Settingdsfasfdasfdsafdsdasass</a>
-                                            </li>
-                                            <li>
-                                                <a href="#"
-                                                    class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Earnings</a>
+                                                    class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white sm:text-md text-md">{{
+                                                        name }}</a>
                                             </li>
                                         </ul>
-                                        <div class="py-1">
-                                            <a href="#"
-                                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">Sign
-                                                out</a>
-                                        </div>
                                     </div>
                                 </li>
                                 <li>

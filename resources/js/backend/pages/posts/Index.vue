@@ -108,9 +108,18 @@ function destroyPost(id) {
                             </td>
                             <td class="p-2">{{ post?.category?.name }}</td>
                             <td class="p-2">{{ post?.author?.name }}</td>
-                            <td class="p-2">{{ post?.status }}</td>
+                            <td class="p-2"> <span
+                                    class="bg-blue-100 text-blue-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded-md dark:bg-blue-900 dark:text-blue-300"
+                                    :class="{ 'bg-green-100 text-green-800': post?.status === 'published', 'bg-red-100 text-red-800': post?.status === 'draft', 'bg-yellow-100 text-yellow-800': post?.status === 'pending', 'bg-gray-100 text-gray-800': post?.status === 'archived', 'bg-purple-100 text-purple-800': post?.status === 'deleted' }">{{
+                                        post?.status }}</span>
+                            </td>
                             <td class="p-2">{{ post?.views }}</td>
-                            <td class="p-2">{{ post?.is_featured ? 'Yes' : 'No' }}</td>
+                            <td class="p-2">
+                                <span
+                                    class="bg-purple-100 text-purple-800 text-sm font-medium me-2 px-2.5 py-0.5 rounded-md dark:bg-blue-900 dark:text-blue-300"
+                                    :class="{ 'bg-purple-100 text-purple-800': post?.is_featured == 1, 'bg-indigo-100 text-indigo-800': post?.is_featured != 1 }">
+                                    {{ post?.is_featured ? 'Yes' : 'No' }} </span>
+                            </td>
                             <!-- <td class="p-2">
                                 <Link :href="`/posts/${post.id}/edit`" class="text-blue-500">Edit</Link>
                                 <Link as="button" method="delete" :href="`/posts/${post.id}`" class="text-red-500 ml-2">

@@ -5,7 +5,7 @@ import "./assets/css/style.css";
 
 import hero1 from "./assets/images/hero-slider/banner-slider.jpg"
 
-import { Head, Link } from "@inertiajs/vue3";
+import { Head, Link, useForm } from "@inertiajs/vue3";
 
 import { ref } from "vue";
 
@@ -21,6 +21,31 @@ const goToSlide = (i) => {
 const mobileOpen = ref(false);
 
 const toggleMobile = () => (mobileOpen.value = !mobileOpen.value);
+
+const props = defineProps({
+    canResetPassword: Boolean,
+    status: {
+        type: String,
+        default: null
+    }
+})
+
+const form = useForm({
+    email: '',
+    password: '',
+    remember: []
+})
+
+const submit = () => {
+    form
+        .transform(data => ({
+            ...data,
+            remember: form.remember && form.remember.length ? 'on' : ''
+        }))
+        .post('/login', {
+            onFinish: () => form.reset('password'),
+        })
+}
 
 </script>
 
@@ -52,17 +77,17 @@ const toggleMobile = () => (mobileOpen.value = !mobileOpen.value);
 
             <section class="register-section bg-white mx-4 md:mx-24 lg:mx-68 mt-8 mb-18">
                 <div class="register p-8 md:p-16">
-                    <form action="">
+                    <form action="" @submit.prevent="submit">
                         <div class="mb-8">
-                            <input type="email" name="email" id="" placeholder="Email Address"
+                            <input type="email" v-model="form.email" id="" placeholder="Email Address"
                                 class="w-full border-1 border-gray-200 text-md text-gray-400 py-5 focus:border-1 focus:border-indigo-700 px-8" />
                         </div>
                         <div class="mb-8">
-                            <input type="password" name="password" id="" placeholder="Password"
+                            <input type="password" v-model="form.password" id="" placeholder="Password"
                                 class="w-full border-1 border-gray-200 text-md text-gray-400 py-5 focus:border-1 focus:border-indigo-700 px-8" />
                         </div>
                         <div class="">
-                            <button type="submit"
+                            <button type="submit" :class="{ 'opacity-25': form.processing }" :disabled="form.processing"
                                 class="border-none outline-none w-full p-4 text-white text-lg font-bold bg-yellow-500 hover:bg-indigo-600 text-center cursor-pointer transition-all duration-300 ease-in-out">
                                 Login
                             </button>
