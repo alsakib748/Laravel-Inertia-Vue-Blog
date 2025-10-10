@@ -5,92 +5,46 @@ import featuredBlog1 from "./assets/images/featured-blog/banner-item-1.jpg"
 import featuredBlog2 from "./assets/images/featured-blog/banner-item-2.jpg"
 
 import { Head, Link, usePage } from "@inertiajs/vue3";
-
-import { ref, onMounted, onUnmounted, computed } from "vue";
-
+import { ref, onMounted, onUnmounted, computed, defineProps, watch } from "vue";
 import Layout from "./Layout.vue";
-
 import dayjs from 'dayjs';
-
 import relativeTime from 'dayjs/plugin/relativeTime';
+// Import Swiper Vue.js components
+import { Swiper, SwiperSlide } from 'swiper/vue';
+// import required modules
+import { Pagination, Autoplay } from 'swiper/modules';
+// Import Swiper styles
+import 'swiper/css';
+import 'swiper/css/pagination';
+
+const modules = [Pagination, Autoplay];
+
+// export default {
+//     components: {
+//         Swiper,
+//         SwiperSlide,
+//     },
+//     setup() {
+//         return {
+//             modules: [Pagination],
+//         };
+//     },
+// };
 
 dayjs.extend(relativeTime);
 
 function formatPublishedAt(published, updated) {
     if (!published) return ''
     const formattedDate = dayjs(published).format('MMMM D, YYYY')
-    const updatedText = updated ? `, Updated ${dayjs(updated).fromNow()}` : ''
+    const updatedText = updated ? `, ${dayjs(updated).fromNow()}` : ''
     return formattedDate + updatedText
 }
 
-// Slider state
-const currentSlide = ref(0);
-const totalSlides = ref(3); // Adjust based on your number of slides
-const sliderInterval = ref(null);
-
-// News slider state  
-const currentNewsSlide = ref(0);
-const newsSlides = ref(3); // Adjust based on your news slides
-
-// Hero slider functions
-const goToSlide = (index) => {
-    currentSlide.value = index;
-    stopAutoPlay();
-
-    // Trigger Flowbite carousel if available
-    const carousel = document.getElementById('controls-carousel');
-    if (carousel && window.FlowbiteInstances) {
-        const carouselInstance = window.FlowbiteInstances.getInstance('Carousel', 'controls-carousel');
-        if (carouselInstance) {
-            carouselInstance.slideTo(index);
-        }
-    }
-
-    // Restart autoplay after a delay
-    setTimeout(() => {
-        startAutoPlay();
-    }, 5000);
-};
-
-const nextSlide = () => {
-    currentSlide.value = (currentSlide.value + 1) % totalSlides.value;
-};
-
-const prevSlide = () => {
-    currentSlide.value = (currentSlide.value - 1 + totalSlides.value) % totalSlides.value;
-};
-
-// News slider functions
-const goToNewsSlide = (index) => {
-    currentNewsSlide.value = index;
-};
-
-// Auto-play slider
-const startAutoPlay = () => {
-    sliderInterval.value = setInterval(() => {
-        nextSlide();
-    }, 4000); // 4 seconds
-};
-
-const stopAutoPlay = () => {
-    if (sliderInterval.value) {
-        clearInterval(sliderInterval.value);
-    }
-};
-
 onMounted(() => {
-    startAutoPlay();
-
     // Initialize Flowbite carousel if available
     if (window.initFlowbite) {
         window.initFlowbite();
     }
-
-    // Expose functions globally for any remaining HTML onclick references
-    window.goToSlide = goToSlide;
-    window.goToNewsSlide = goToNewsSlide;
-}); onUnmounted(() => {
-    stopAutoPlay();
 });
 
 const mobileOpen = ref(false);
@@ -100,6 +54,35 @@ const page = usePage();
 
 const sliderPosts = computed(() => page.props.sliderPosts ?? []);
 
+const featuredPosts = computed(() => page.props.featuredPosts ?? []);
+
+const firstPriorityCategory = page.props.firstPriorityCategory;
+
+const props = defineProps({
+    firstPriorityCategoryPosts: {
+        type: Array,
+        default: () => []
+    },
+    secondPriorityCategoryPosts: {
+        type: Array,
+        default: () => []
+    },
+    thirdPriorityCategoryPosts: {
+        type: Array,
+        default: () => []
+    },
+    trendingPosts: {
+        type: Array,
+        default: () => []
+    },
+    news: {
+        type: Array,
+        default: () => []
+    }
+});
+
+const prettyProps = computed(() => JSON.stringify(page.props, null, 2));
+
 </script>
 
 <template>
@@ -108,7 +91,16 @@ const sliderPosts = computed(() => page.props.sliderPosts ?? []);
     <Layout>
 
         <main>
-            <section class="news-section">
+
+            <!-- <pre class="text-xs whitespace-pre-wrap">
+                {{ prettyProps }}
+            </pre> -->
+
+            <!-- <pre class="text-xs whitespace-pre-wrap">
+                {{ trendingPosts }}
+            </pre> -->
+
+            <!-- <section class="news-section">
                 <div class="w-full px-4 md:px-14 lg:px-22">
                     <div class="news grid grid-cols-1 grid-cols-12 gap-4">
                         <div class="col-span-2 md:col-span-2">
@@ -118,11 +110,11 @@ const sliderPosts = computed(() => page.props.sliderPosts ?? []);
                             </div>
                         </div>
                         <div class="col-span-10 md:col-span-10">
-                            <!-- Slider Container -->
+
                             <div class="relative overflow-hidden rounded-lg">
-                                <!-- Slider Track -->
+
                                 <div class="flex transition-transform duration-500 ease-in-out" id="slider-track">
-                                    <!-- Slide 1 -->
+
                                     <div class="w-full flex-shrink-0">
                                         <div class="text-center text-white">
                                             <p class="text-sm md:text-xl opacity-90 max-w-2xl mx-auto">
@@ -133,7 +125,7 @@ const sliderPosts = computed(() => page.props.sliderPosts ?? []);
                                         </div>
                                     </div>
 
-                                    <!-- Slide 2 -->
+
                                     <div class="w-full flex-shrink-0">
                                         <div class="text-center text-white">
                                             <p class="text-sm md:text-xl opacity-90 max-w-2xl mx-auto">
@@ -144,7 +136,7 @@ const sliderPosts = computed(() => page.props.sliderPosts ?? []);
                                         </div>
                                     </div>
 
-                                    <!-- Slide 3 -->
+
                                     <div class="w-full flex-shrink-0">
                                         <div class="text-center text-white">
                                             <p class="text-sm md:text-xl opacity-90 max-w-2xl mx-auto">
@@ -156,7 +148,6 @@ const sliderPosts = computed(() => page.props.sliderPosts ?? []);
                                     </div>
                                 </div>
 
-                                <!-- Slide Indicators (Pagination) -->
                                 <div
                                     class="absolute bottom-1 md:bottom-4 right-0 md:right-1 transform -translate-x-1/2 flex space-x-3">
                                     <button
@@ -169,6 +160,135 @@ const sliderPosts = computed(() => page.props.sliderPosts ?? []);
                                         class="w-2 h-2 bg-white/60 hover:bg-white rounded-full transition-all duration-200 indicator"
                                         @click="goToSlide(2)" aria-label="Go to slide 3" title="Go to slide 3"></button>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section> -->
+
+            <section class="news-section">
+                <div class="w-full px-4 md:px-14 lg:px-22">
+                    <div class="news grid grid-cols-1 grid-cols-12 gap-4">
+                        <div class="col-span-2 md:col-span-2">
+                            <div class="flex items-center justify-around px-2 md:px-6">
+                                <span class="text-white text-md md:text-xl pe-3 md:pe-0">News</span>
+                                <div class="w-0.5 bg-gray-300 h-12"></div>
+                            </div>
+                        </div>
+                        <div class="col-span-10 md:col-span-10">
+
+                            <div class="relative overflow-hidden rounded-lg">
+
+                                <div class="flex transition-transform duration-500 ease-in-out" id="slider-track">
+
+                                    <swiper :pagination="{
+                                        dynamicBullets: true,
+                                        clickable: true,
+                                    }" :modules="modules" :autoplay="{
+                                        delay: 3000,
+                                        disableOnInteraction: false,
+                                    }" class="mySwiper relative">
+                                        <!-- Dynamic slides from news data -->
+                                        <template v-if="news.length > 0">
+                                            <swiper-slide v-for="newsItem in news" :key="newsItem.id">
+                                                <div class="w-full flex-shrink-0">
+                                                    <div class="text-center text-white">
+                                                        <p class="text-sm md:text-xl opacity-90 max-w-2xl mx-auto">
+                                                            {{ newsItem?.headline }}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </swiper-slide>
+                                        </template>
+
+                                        <!-- Fallback slides when no news data -->
+                                        <!-- <template v-if="!news || news.length === 0">
+                                            <swiper-slide>
+                                                <div class="w-full flex-shrink-0">
+                                                    <div class="text-center text-white">
+                                                        <p class="text-sm md:text-xl opacity-90 max-w-2xl mx-auto">
+                                                            Discover the latest insights, stories, and updates from
+                                                            around the world. Stay informed with our curated content
+                                                            and expert analysis.
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </swiper-slide>
+                                            <swiper-slide>
+                                                <div class="w-full flex-shrink-0">
+                                                    <div class="text-center text-white">
+                                                        <p class="text-sm md:text-xl opacity-90 max-w-2xl mx-auto">
+                                                            Get real-time updates on the most important stories
+                                                            happening right now. Our team works around the clock to
+                                                            bring you the latest developments.
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </swiper-slide>
+                                            <swiper-slide>
+                                                <div class="w-full flex-shrink-0">
+                                                    <div class="text-center text-white">
+                                                        <p class="text-sm md:text-xl opacity-90 max-w-2xl mx-auto">
+                                                            Dive deep into complex topics with our expert
+                                                            contributors. Gain new perspectives and understanding on
+                                                            the issues that matter most.
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </swiper-slide>
+                                        </template> -->
+                                        <!-- <swiper-slide>Slide 4</swiper-slide>
+                                        <swiper-slide>Slide 5</swiper-slide>
+                                        <swiper-slide>Slide 6</swiper-slide>
+                                        <swiper-slide>Slide 7</swiper-slide>
+                                        <swiper-slide>Slide 8</swiper-slide>
+                                        <swiper-slide>Slide 9</swiper-slide> -->
+                                    </swiper>
+
+                                    <!-- <div class="w-full flex-shrink-0">
+                                        <div class="text-center text-white">
+                                            <p class="text-sm md:text-xl opacity-90 max-w-2xl mx-auto">
+                                                Discover the latest insights, stories, and updates from
+                                                around the world. Stay informed with our curated content
+                                                and expert analysis.
+                                            </p>
+                                        </div>
+                                    </div> -->
+
+                                    <!-- <div class="w-full flex-shrink-0">
+                                        <div class="text-center text-white">
+                                            <p class="text-sm md:text-xl opacity-90 max-w-2xl mx-auto">
+                                                Get real-time updates on the most important stories
+                                                happening right now. Our team works around the clock to
+                                                bring you the latest developments.
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div class="w-full flex-shrink-0">
+                                        <div class="text-center text-white">
+                                            <p class="text-sm md:text-xl opacity-90 max-w-2xl mx-auto">
+                                                Dive deep into complex topics with our expert
+                                                contributors. Gain new perspectives and understanding on
+                                                the issues that matter most.
+                                            </p>
+                                        </div>
+                                    </div> -->
+
+                                </div>
+
+                                <!-- <div
+                                    class="absolute bottom-1 md:bottom-4 right-0 md:right-1 transform -translate-x-1/2 flex space-x-3">
+                                    <button
+                                        class="w-2 h-2 bg-white/60 hover:bg-white rounded-full transition-all duration-200 indicator active"
+                                        title="Go to slide 1"></button>
+                                    <button
+                                        class="w-2 h-2 bg-white/60 hover:bg-white rounded-full transition-all duration-200 indicator"
+                                        aria-label="Go to slide 2" title="Go to slide 2"></button>
+                                    <button
+                                        class="w-2 h-2 bg-white/60 hover:bg-white rounded-full transition-all duration-200 indicator"
+                                        aria-label="Go to slide 3" title="Go to slide 3"></button>
+                                </div> -->
                             </div>
                         </div>
                     </div>
@@ -242,8 +362,7 @@ const sliderPosts = computed(() => page.props.sliderPosts ?? []);
                                 </div>
                             </div>
 
-                            <!-- Item 2 -->
-                            <div class="hidden duration-700 ease-in-out home-slider-inner z-[300]" data-carousel-item>
+                            <!-- <div class="hidden duration-700 ease-in-out home-slider-inner z-[300]" data-carousel-item>
                                 <img src="./assets/images/hero-slider/banner-item-2.jpg"
                                     class="absolute block w-full h-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2"
                                     alt="..." />
@@ -299,7 +418,7 @@ const sliderPosts = computed(() => page.props.sliderPosts ?? []);
                                     </div>
                                 </div>
                             </div>
-                            <!-- Item 3 -->
+
                             <div class="hidden duration-700 ease-in-out home-slider-inner z-[300]" data-carousel-item>
                                 <img src="./assets/images/hero-slider/banner-slider-2.jpg"
                                     class="absolute block w-full h-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2"
@@ -356,7 +475,7 @@ const sliderPosts = computed(() => page.props.sliderPosts ?? []);
                                     </div>
                                 </div>
                             </div>
-                            <!-- Item 4 -->
+
                             <div class="hidden duration-700 ease-in-out home-slider-inner z-[300]" data-carousel-item>
                                 <img src="./assets/images/hero-slider/banner-slider.jpg"
                                     class="absolute block w-full h-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2"
@@ -413,7 +532,7 @@ const sliderPosts = computed(() => page.props.sliderPosts ?? []);
                                     </div>
                                 </div>
                             </div>
-                            <!-- Item 5 -->
+
                             <div class="hidden duration-700 ease-in-out home-slider-inner z-[300]" data-carousel-item>
                                 <img src="./assets/images/hero-slider/banner-item-2.jpg"
                                     class="absolute block w-full h-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2"
@@ -469,7 +588,8 @@ const sliderPosts = computed(() => page.props.sliderPosts ?? []);
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </div> -->
+
                         </div>
                         <!-- Slider controls -->
                         <button type="button"
@@ -505,29 +625,33 @@ const sliderPosts = computed(() => page.props.sliderPosts ?? []);
             <!-- todo: Featured Blog Section -->
             <section class="featured-blog-section">
                 <div class="featured-blog grid grid-cols-1 md:grid-cols-12 gap-4 w-full px-4 md:px-14 lg:px-22">
-                    <div class="col-span-1 md:col-span-6 mb-4 md:mb-0">
+                    <div v-for="featuredPost in featuredPosts" :key="featuredPost.id"
+                        class="col-span-1 md:col-span-6 mb-4 md:mb-0">
                         <div
                             class="featured-blog-item relative overflow-hidden rounded-lg shadow-lg group cursor-pointer">
                             <div class="featured-blog-img h-86 relative">
-                                <img :src="featuredBlog1" alt="Featured Blog 1"
+                                <img :src="featuredPost?.thumbnail" :alt="featuredPost?.title"
                                     class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" />
                                 <div
-                                    class="featured-blog-item-overlay absolute inset-0 bg-gradient-to-r from-indigo-600/80 to-yellow-600/80 opacity-80 group-hover:opacity-0 transition-opacity duration-300">
+                                    class="featured-blog-item-overlay absolute inset-0 bg-gradient-to-r from-indigo-600/60 to-yellow-600/60 opacity-80 group-hover:opacity-0 transition-opacity duration-300">
                                 </div>
                             </div>
                             <div
                                 class="content absolute inset-0 p-6 flex flex-col items-start justify-center text-white z-10">
-                                <p class="text-sm opacity-90 mb-2">August 25, 2025</p>
-                                <a href="javascript:void(0)"
+                                <p class="text-sm opacity-90 mb-2">{{ formatPublishedAt(featuredPost.published_at,
+                                    featuredPost.updated_at) }}</p>
+                                <Link :href="route('frontend.blog.details', featuredPost?.slug)"
                                     class="font-bold text-xl lg:text-2xl mb-6 hover:text-yellow-300 transition-colors duration-300 line-clamp-2">
-                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit
-                                </a>
+                                {{ featuredPost?.title }}
+                                </Link>
                                 <a href="javascript:void(0)"
-                                    class="rounded-full px-6 py-2 bg-indigo-600 hover:bg-yellow-600 text-white text-sm font-medium transition-all duration-300 shadow-lg">Finance</a>
+                                    class="rounded-full px-6 py-2 bg-indigo-600 hover:bg-yellow-600 text-white text-sm font-medium transition-all duration-300 shadow-lg">{{
+                                        featuredPost?.category?.name }}
+                                </a>
                             </div>
                         </div>
                     </div>
-                    <div class="col-span-1 md:col-span-6">
+                    <!-- <div class="col-span-1 md:col-span-6">
                         <div
                             class="featured-blog-item relative overflow-hidden rounded-lg shadow-lg group cursor-pointer">
                             <div class="featured-blog-img h-86 relative">
@@ -548,7 +672,7 @@ const sliderPosts = computed(() => page.props.sliderPosts ?? []);
                                     class="rounded-full px-6 py-2 bg-indigo-600 hover:bg-yellow-600 text-white text-sm font-medium transition-all duration-300 shadow-lg">Business</a>
                             </div>
                         </div>
-                    </div>
+                    </div> -->
                 </div>
             </section>
 
@@ -584,7 +708,9 @@ const sliderPosts = computed(() => page.props.sliderPosts ?? []);
                     <div class="main-post col-span-1 md:col-span-12 lg:col-span-8">
                         <!-- todo: BUSINESS Post -->
                         <div class="business-post">
-                            <h2 class="text-2xl font-bold heading">BUSINESS POST</h2>
+                            <h2 class="text-2xl font-bold heading">
+                                {{ page.props.firstPriorityCategory?.name }} POST
+                            </h2>
                             <br />
                             <a href="" class="group flex items-center justify-end">
                                 <span class="group-hover:text-indigo-700 font-bold">View More</span>
@@ -599,38 +725,46 @@ const sliderPosts = computed(() => page.props.sliderPosts ?? []);
                             </a>
                             <br />
                             <div class="grid grid-cols-1 md:grid-cols-12 gap-8">
-                                <div class="business-post-item col-span-1 md:col-span-6 lg:col-span-6">
+                                <div v-for="firstPriorityCategoryPost in firstPriorityCategoryPosts"
+                                    :key="firstPriorityCategoryPost.id"
+                                    class="business-post-item col-span-1 md:col-span-6 lg:col-span-6">
                                     <div class="group bg-white dark:bg-gray-800 dark:border-gray-700 overflow-hidden">
                                         <div class="relative">
-                                            <a href="#">
-                                                <img class="w-full md:h-48 lg:h-56 xl:h-60 2xl:h-96 group-hover:scale-110 transition-transform duration-300"
-                                                    src="./assets/images/business-post/business-post-1.jpg" alt="" />
-                                            </a>
+                                            <Link
+                                                :href="route('frontend.blog.details', firstPriorityCategoryPost?.slug)">
+                                            <img class="w-full md:h-48 lg:h-56 xl:h-60 2xl:h-96 group-hover:scale-110 transition-transform duration-300"
+                                                :src="firstPriorityCategoryPost?.thumbnail" alt="" />
+                                            </Link>
                                             <a href="javascript:void(0)"
-                                                class="absolute top-3 left-3 px-6 py-1 bg-indigo-600 hover:bg-yellow-500 text-white rounded-full text-md transition-all duration-300 ease-in-out">Finance</a>
+                                                class="absolute top-3 left-3 px-6 py-1 bg-indigo-600 hover:bg-yellow-500 text-white rounded-full text-md transition-all duration-300 ease-in-out">{{
+                                                    firstPriorityCategoryPost?.category?.name }}
+                                            </a>
                                         </div>
 
                                         <div class="p-5">
-                                            <a href="#">
-                                                <h5
-                                                    class="mb-2 md:text-md lg:text-xl font-medium tracking-tight text-gray-900 hover:text-indigo-700 dark:text-white">
-                                                    Lorem ipsum dolor sit amet, consectetur adipiscing
-                                                    elit, sed do
-                                                </h5>
-                                            </a>
+                                            <Link
+                                                :href="route('frontend.blog.details', firstPriorityCategoryPost?.slug)">
+                                            <h5
+                                                class="mb-2 md:text-md lg:text-xl font-medium tracking-tight text-gray-900 hover:text-indigo-700 dark:text-white">
+                                                {{ firstPriorityCategoryPost?.title }}
+                                            </h5>
+                                            </Link>
 
                                             <div
                                                 class="flex items-center justify-start md:gap-1 lg:gap-2 md:text-xs lg:text-sm xl:text-md">
-                                                <span class="text-gray-600">Dec 22, 2018 at 19:35</span>
+                                                <span class="text-gray-600">{{
+                                                    formatPublishedAt(firstPriorityCategoryPost.published_at,
+                                                        firstPriorityCategoryPost.updated_at) }}</span>
                                                 <span class="text-gray-600">|</span>
-                                                <a href=""
-                                                    class="text-gray-600 font-normal hover:text-indigo-700">Mahfuz
-                                                    Riad</a>
+                                                <a href="" class="text-gray-600 font-normal hover:text-indigo-700">
+                                                    {{ firstPriorityCategoryPost?.author?.name }}
+                                                </a>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="business-post-item col-span-1 md:col-span-6 lg:col-span-6">
+
+                                <!-- <div class="business-post-item col-span-1 md:col-span-6 lg:col-span-6">
                                     <div class="group bg-white dark:bg-gray-800 dark:border-gray-700 overflow-hidden">
                                         <div class="relative">
                                             <a href="#">
@@ -661,7 +795,6 @@ const sliderPosts = computed(() => page.props.sliderPosts ?? []);
                                         </div>
                                     </div>
                                 </div>
-
                                 <div class="business-post-item col-span-1 md:col-span-6 lg:col-span-6">
                                     <div class="group bg-white py-2 dark:bg-gray-800 dark:border-gray-700 overflow-hidden"
                                         style="
@@ -691,7 +824,6 @@ const sliderPosts = computed(() => page.props.sliderPosts ?? []);
                                         </div>
                                     </div>
                                 </div>
-
                                 <div class="business-post-item col-span-1 md:col-span-6 lg:col-span-6">
                                     <div class="group bg-white py-2 dark:bg-gray-800 dark:border-gray-700 overflow-hidden"
                                         style="
@@ -719,7 +851,7 @@ const sliderPosts = computed(() => page.props.sliderPosts ?? []);
                                                 class="px-6 py-1 bg-indigo-600 hover:bg-yellow-500 text-white rounded-full text-md transition-all duration-300 ease-in-out">Tech</a>
                                         </div>
                                     </div>
-                                </div>
+                                </div> -->
                             </div>
                         </div>
 
@@ -730,7 +862,9 @@ const sliderPosts = computed(() => page.props.sliderPosts ?? []);
                             <br />
 
                             <div class="top-heading flex items-center justify-between">
-                                <h2 class="text-2xl font-bold heading">TRAVEL POST</h2>
+                                <h2 class="text-2xl font-bold heading">{{ page.props.secondPriorityCategory?.name }}
+                                    POST
+                                </h2>
                                 <div class="hr-line"></div>
                                 <a href="" class="group flex items-center justify-end">
                                     <span class="group-hover:text-indigo-700 font-bold">View More</span>
@@ -747,43 +881,50 @@ const sliderPosts = computed(() => page.props.sliderPosts ?? []);
 
                             <br /><br />
 
-                            <div class="travel-post group item flex flex-col md:flex-row items-start bg-white mb-6">
-                                <a href="#"
+                            <div v-for="secondPriorityCategoryPost in secondPriorityCategoryPosts"
+                                :key="secondPriorityCategoryPost.id"
+                                class="travel-post group item flex flex-col md:flex-row items-start bg-white mb-6">
+
+                                <!-- {{ secondPriorityCategoryPost }} -->
+
+                                <Link :href="route('frontend.blog.details', secondPriorityCategoryPost?.slug)"
                                     class="bg-white hover:bg-white dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700 w-full flex flex-col md:flex-row items-start">
+                                <div
+                                    class="relative overflow-hidden w-full h-56 md:w-52 md:h-56 lg:w-52 lg:h-56 xl:w-80 xl:h-60">
+                                    <img class="w-full h-56 md:w-52 md:h-56 lg:w-52 lg:h-56 xl:w-80 xl:h-60 group-hover:transform group-hover:scale-110 transition-all duration-300 ease-in-out"
+                                        :src="secondPriorityCategoryPost?.thumbnail" alt="" />
                                     <div
-                                        class="relative overflow-hidden w-full h-56 md:w-52 md:h-56 lg:w-52 lg:h-56 xl:w-80 xl:h-60">
-                                        <img class="w-full h-56 md:w-52 md:h-56 lg:w-52 lg:h-56 xl:w-80 xl:h-60 group-hover:transform group-hover:scale-110 transition-all duration-300 ease-in-out"
-                                            src="./assets/images/travel-post/travel-post-1.jpg" alt="" />
-                                        <div
-                                            class="hidden group-hover:flex absolute top-3 right-3 flex items-center justify-end gap-5">
-                                            <a href="" class="text-white hover:text-yellow-600 text-xl"><i
-                                                    class="fab fa-twitter"></i></a>
-                                            <a href="" class="text-white hover:text-yellow-600 text-xl"><i
-                                                    class="fab fa-facebook"></i></a>
-                                            <a href="" class="text-white hover:text-yellow-600 text-xl"><i
-                                                    class="fab fa-google-plus"></i></a>
-                                        </div>
+                                        class="hidden group-hover:flex absolute top-3 right-3 flex items-center justify-end gap-5">
+                                        <a href="" class="text-white hover:text-yellow-600 text-xl"><i
+                                                class="fab fa-twitter"></i></a>
+                                        <a href="" class="text-white hover:text-yellow-600 text-xl"><i
+                                                class="fab fa-facebook"></i></a>
+                                        <a href="" class="text-white hover:text-yellow-600 text-xl"><i
+                                                class="fab fa-google-plus"></i></a>
                                     </div>
-                                    <div class="flex flex-col justify-between p-4">
-                                        <a href="javascript:void(0)"
-                                            class="mb-2 text-2xl font-medium tracking-tight text-gray-900 group-hover:text-indigo-700 dark:text-white">Lorem
-                                            ipsum dolor sit amet, consectetur adipiscing
-                                            elit</a>
-                                        <div
-                                            class="flex items-center justify-start gap-2 text-sm md:text-md lg:text-md xl:text-lg">
-                                            <span class="">Dec 10, 2018 at 19:35</span>
-                                            <span class="">|</span>
-                                            <span class="">Emran Khan</span>
-                                        </div>
-                                        <p class="pt-2 mb-3 text-md font-normal text-gray-700 dark:text-gray-400">
-                                            At vero eos et accusamus et iusto odio dignissimos ducimus
-                                            qui blanditiis praesentium voluptatum.
-                                        </p>
+                                </div>
+                                <div class="flex flex-col justify-between p-4">
+                                    <Link :href="route('frontend.blog.details', secondPriorityCategoryPost?.slug)"
+                                        class="mb-2 text-2xl font-medium tracking-tight text-gray-900 group-hover:text-indigo-700 dark:text-white">
+                                    {{ secondPriorityCategoryPost?.title }}
+                                    </Link>
+                                    <div
+                                        class="flex items-center justify-start gap-2 text-sm md:text-md lg:text-md xl:text-lg">
+                                        <span class="">{{
+                                            formatPublishedAt(secondPriorityCategoryPost?.published_at,
+                                                secondPriorityCategoryPost?.updated_at)
+                                        }}</span>
+                                        <span class="">|</span>
+                                        <span class="">{{ secondPriorityCategoryPost?.author?.name }}</span>
                                     </div>
-                                </a>
+                                    <p class="pt-2 mb-3 text-md font-normal text-gray-700 dark:text-gray-400">
+                                        {{ secondPriorityCategoryPost?.excerpt }}
+                                    </p>
+                                </div>
+                                </Link>
                             </div>
 
-                            <div class="travel-post group item flex flex-col md:flex-row items-start bg-white mb-6">
+                            <!-- <div class="travel-post group item flex flex-col md:flex-row items-start bg-white mb-6">
                                 <a href="#"
                                     class="bg-white hover:bg-white dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700 w-full flex flex-col md:flex-row items-start">
                                     <div
@@ -852,7 +993,8 @@ const sliderPosts = computed(() => page.props.sliderPosts ?? []);
                                         </p>
                                     </div>
                                 </a>
-                            </div>
+                            </div> -->
+
                         </div>
 
                         <!-- First magazine section -->
@@ -921,7 +1063,7 @@ const sliderPosts = computed(() => page.props.sliderPosts ?? []);
                         </div>
 
                         <!-- todo: Watch It -->
-                        <div class="travel-post watch-it-section">
+                        <!-- <div class="travel-post watch-it-section">
                             <div class="top-heading flex items-center justify-between">
                                 <h2 class="text-2xl font-bold heading uppercase">Watch It</h2>
                                 <div class="hr-line"></div>
@@ -961,7 +1103,6 @@ const sliderPosts = computed(() => page.props.sliderPosts ?? []);
                                             <span class="">3.16</span>
                                         </a>
                                     </div>
-                                    <!-- <br /> -->
                                     <div class="pt-3">
                                         <a href="javascript:void(0)"
                                             class="font-bold text-md md:text-xl hover:text-indigo-700">
@@ -991,7 +1132,6 @@ const sliderPosts = computed(() => page.props.sliderPosts ?? []);
                                             <span class="">3.16</span>
                                         </a>
                                     </div>
-                                    <!-- <br /> -->
                                     <div class="pt-3">
                                         <a href="javascript:void(0)"
                                             class="font-bold text-md md:text-xl hover:text-indigo-700">
@@ -1020,7 +1160,6 @@ const sliderPosts = computed(() => page.props.sliderPosts ?? []);
                                             <span class="">3.16</span>
                                         </a>
                                     </div>
-                                    <!-- <br /> -->
                                     <div class="pt-3">
                                         <a href="javascript:void(0)"
                                             class="font-bold text-md md:text-xl hover:text-indigo-700">
@@ -1049,7 +1188,6 @@ const sliderPosts = computed(() => page.props.sliderPosts ?? []);
                                             <span class="">3.16</span>
                                         </a>
                                     </div>
-                                    <!-- <br /> -->
                                     <div class="pt-3">
                                         <a href="javascript:void(0)"
                                             class="font-bold text-md md:text-xl hover:text-indigo-700">
@@ -1058,8 +1196,6 @@ const sliderPosts = computed(() => page.props.sliderPosts ?? []);
                                         </a>
                                     </div>
                                 </div>
-
-                                <!-- technology and trending posts -->
                                 <div class="col-span-1">
                                     <div class="p-8 bg-white">
                                         <a href="" class="font-bold text-lg hover:text-indigo-700">Stocks Climb as
@@ -1083,14 +1219,16 @@ const sliderPosts = computed(() => page.props.sliderPosts ?? []);
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </div> -->
 
                         <!-- todo: Fashion Section -->
                         <div class="travel-post">
                             <div class="top-heading flex items-center justify-between">
-                                <h2 class="text-2xl font-bold heading uppercase">Fashion</h2>
+                                <h2 class="text-2xl font-bold heading uppercase">{{
+                                    page.props.thirdPriorityCategory?.name }}
+                                </h2>
                                 <div class="hr-line"></div>
-                                <a href="" class="group flex items-center justify-end">
+                                <a href="javascript:void(0)" class="group flex items-center justify-end">
                                     <span class="group-hover:text-indigo-700 font-bold">View More</span>
                                     <span
                                         class="mt-1 font-bold text-indigo-700 group-hover:transform group-hover:translate-x-[-4px]">
@@ -1109,43 +1247,49 @@ const sliderPosts = computed(() => page.props.sliderPosts ?? []);
                             <div class="business-post">
                                 <br />
                                 <div class="grid grid-cols-1 md:grid-cols-12 gap-8">
-                                    <div class="business-post-item col-span-1 md:col-span-6 lg:col-span-6">
+                                    <div v-for="thirdPriorityCategoryPost in thirdPriorityCategoryPosts"
+                                        :key="thirdPriorityCategoryPost.id"
+                                        class="business-post-item col-span-1 md:col-span-6 lg:col-span-6">
                                         <div
                                             class="group bg-white dark:bg-gray-800 dark:border-gray-700 overflow-hidden">
                                             <div
                                                 class="relative w-full md:h-48 lg:h-50 xl:h-56 2xl:h-96 overflow-hidden">
-                                                <a href="#">
-                                                    <img class="w-full md:h-48 lg:h-50 xl:h-56 2xl:h-96 group-hover:scale-110 transition-transform duration-300"
-                                                        src="./assets/images/business-post/business-post-1.jpg"
-                                                        alt="" />
-                                                </a>
+                                                <Link
+                                                    :href="route('frontend.blog.details', thirdPriorityCategoryPost?.slug)">
+                                                <img class="w-full md:h-48 lg:h-50 xl:h-56 2xl:h-96 group-hover:scale-110 transition-transform duration-300"
+                                                    :src="thirdPriorityCategoryPost?.thumbnail" alt="" />
+                                                </Link>
                                                 <a href="javascript:void(0)"
-                                                    class="absolute top-3 left-3 px-6 py-1 bg-indigo-600 hover:bg-yellow-500 text-white rounded-full text-md transition-all duration-300 ease-in-out">Fashion</a>
+                                                    class="absolute top-3 left-3 px-6 py-1 bg-indigo-600 hover:bg-yellow-500 text-white rounded-full text-md transition-all duration-300 ease-in-out">{{
+                                                        thirdPriorityCategoryPost?.category?.name }}</a>
                                             </div>
 
                                             <div class="p-5">
-                                                <a href="#">
-                                                    <h5
-                                                        class="mb-2 md:text-md lg:text-xl font-medium tracking-tight text-gray-900 hover:text-indigo-700 dark:text-white">
-                                                        Nam convallis lacus volutpat risus luctus, et
-                                                        consectetur massa pharetra.
-                                                    </h5>
-                                                </a>
+                                                <Link
+                                                    :href="route('frontend.blog.details', thirdPriorityCategoryPost?.slug)">
+                                                <h5
+                                                    class="mb-2 md:text-md lg:text-xl font-medium tracking-tight text-gray-900 hover:text-indigo-700 dark:text-white">
+                                                    {{ thirdPriorityCategoryPost?.title }}
+                                                </h5>
+                                                </Link>
 
                                                 <div
                                                     class="flex items-center justify-start md:gap-1 lg:gap-2 md:text-xs lg:text-sm xl:text-md">
-                                                    <span class="text-gray-600">Dec 22, 2018 at 19:35</span>
+                                                    <span class="text-gray-600">{{
+                                                        formatPublishedAt(thirdPriorityCategoryPost?.published_at,
+                                                            thirdPriorityCategoryPost?.updated_at)
+                                                    }}</span>
                                                     <span class="text-gray-600">|</span>
-                                                    <a href=""
-                                                        class="text-gray-600 font-normal hover:text-indigo-700">Mahfuz
-                                                        Riad</a>
+                                                    <a href="" class="text-gray-600 font-normal hover:text-indigo-700">
+                                                        {{ thirdPriorityCategoryPost?.author?.name }}</a>
                                                 </div>
 
                                                 <br />
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="business-post-item col-span-1 md:col-span-6 lg:col-span-6">
+
+                                    <!-- <div class="business-post-item col-span-1 md:col-span-6 lg:col-span-6">
                                         <div
                                             class="group bg-white dark:bg-gray-800 dark:border-gray-700 overflow-hidden">
                                             <div
@@ -1236,7 +1380,7 @@ const sliderPosts = computed(() => page.props.sliderPosts ?? []);
                                                     class="px-6 py-1 bg-indigo-600 hover:bg-yellow-500 text-white rounded-full text-md transition-all duration-300 ease-in-out">Tech</a>
                                             </div>
                                         </div>
-                                    </div>
+                                    </div> -->
                                 </div>
                             </div>
                         </div>
@@ -1269,26 +1413,27 @@ const sliderPosts = computed(() => page.props.sliderPosts ?? []);
                         <!-- Trending News -->
                         <div class="trending-news-section">
                             <h3 class="font-medium text-2xl border-b border-gray-300 pb-2">
-                                Trending News
+                                Trending Posts
                             </h3>
                             <div class="">
-                                <div class="group trending-news-item bg-white my-6">
-                                    <a href="" class="m-0 p-0">
-                                        <div class="overflow-hidden">
-                                            <img src="./assets/images/trending-news/lnw-1.jpg" alt=""
-                                                class="w-full h-42 md:h-48 lg:h-42 2xl:h-64 group-hover:transform group-hover:scale-110 transition-all duration-300 ease-in-out" />
-                                        </div>
-                                        <div class="p-6">
-                                            <h3
-                                                class="text-lg font-bold group-hover:text-indigo-800 hover:text-indigo-800">
-                                                Envion – Digital Currency Mint in Exploits World’s
-                                                Lowest Cost Power
-                                            </h3>
-                                        </div>
-                                    </a>
+                                <div v-for="trendingPost in trendingPosts"
+                                    class="group trending-news-item bg-white my-6 mb-3 border-b-4 border-indigo-500">
+                                    <Link :href="route('frontend.blog.details', trendingPost?.slug)" class="m-0 p-0">
+                                    <div class="overflow-hidden">
+                                        <img :src="trendingPost?.thumbnail" alt=""
+                                            class="w-full h-42 md:h-48 lg:h-42 2xl:h-64 group-hover:transform group-hover:scale-110 transition-all duration-300 ease-in-out" />
+                                    </div>
+                                    <div class="p-6">
+                                        <h3 class="text-lg font-bold group-hover:text-indigo-800 hover:text-indigo-800">
+                                            {{ trendingPost?.title }}
+                                        </h3>
+                                    </div>
+                                    </Link>
+                                    <!-- <br /> -->
+                                    <!-- <hr class="border-gray-300" /> -->
                                 </div>
-                                <hr class="border-gray-300" />
-                                <div class="group trending-news-item bg-white my-6">
+
+                                <!-- <div class="group trending-news-item bg-white my-6">
                                     <a href="" class="m-0 p-0">
                                         <div class="overflow-hidden">
                                             <img src="./assets/images/trending-news/lnw-2.jpg" alt=""
@@ -1317,7 +1462,7 @@ const sliderPosts = computed(() => page.props.sliderPosts ?? []);
                                             </h3>
                                         </div>
                                     </a>
-                                </div>
+                                </div> -->
 
                                 <a href="javascript:void(0)" class="group">
                                     <div
@@ -1327,7 +1472,7 @@ const sliderPosts = computed(() => page.props.sliderPosts ?? []);
                                 </a>
                             </div>
 
-                            <div class="my-12">
+                            <!-- <div class="my-12">
                                 <div class="bg-white p-4">
                                     <div class="pb-3 mb-4 border-b border-gray-300">
                                         <a href="" class="font-bold text-xl hover:text-indigo-700">
@@ -1358,18 +1503,18 @@ const sliderPosts = computed(() => page.props.sliderPosts ?? []);
                                         <p class="py-2 text-yellow-500">11:45, Press Releases</p>
                                     </div>
                                 </div>
-                            </div>
+                            </div> -->
 
                             <!-- todo: Advertisment -->
-                            <div class="my-12 advertisment">
+                            <!-- <div class="my-12 advertisment">
                                 <a href="" class="">
                                     <img src="./assets/images/advertisement/advertisement-1.jpg" alt=""
                                         class="w-full h-auto" />
                                 </a>
-                            </div>
+                            </div> -->
 
                             <!-- todo: Video Blog -->
-                            <div class="my-12">
+                            <!-- <div class="my-12">
                                 <div class="watch-it-post-item col-span-1 md:col-span-1 overflow-hidden mb-6">
                                     <div class="group relative">
                                         <a href="" class="">
@@ -1390,7 +1535,6 @@ const sliderPosts = computed(() => page.props.sliderPosts ?? []);
                                             <span class="">3.16</span>
                                         </a>
                                     </div>
-                                    <!-- <br /> -->
                                     <div class="pt-3">
                                         <a href="javascript:void(0)"
                                             class="font-bold text-md md:text-xl hover:text-indigo-700">
@@ -1399,17 +1543,17 @@ const sliderPosts = computed(() => page.props.sliderPosts ?? []);
                                         </a>
                                     </div>
                                 </div>
-                            </div>
+                            </div> -->
 
                             <!-- todo: Banner -->
-                            <div class="my-12">
+                            <!-- <div class="my-12">
                                 <div class="bg-white p-8">
                                     <a href="javascript:void(0)" class="">
                                         <img src="./assets/images/banner/advertisement-2.jpg" alt=""
                                             class="w-full h-auto" />
                                     </a>
                                 </div>
-                            </div>
+                            </div> -->
 
                             <!-- todo: Social Media Links -->
                             <div class="social-media-links">
@@ -1464,7 +1608,7 @@ const sliderPosts = computed(() => page.props.sliderPosts ?? []);
                                                 id="dashboard-styled-tab" data-tabs-target="#styled-dashboard"
                                                 type="button" role="tab" aria-controls="dashboard"
                                                 aria-selected="false">
-                                                Gaming
+                                                Education
                                             </button>
                                         </li>
                                     </ul>
@@ -1472,103 +1616,48 @@ const sliderPosts = computed(() => page.props.sliderPosts ?? []);
                                 <div id="default-styled-tab-content">
                                     <div class="hidden p-4 rounded-lg bg-gray-50 dark:bg-gray-800" id="styled-profile"
                                         role="tabpanel" aria-labelledby="profile-tab">
-                                        <div class="sidebar-tabs-item py-2 mb-4 border-b border-gray-200">
-                                            <a href=""
+
+                                        <div v-for="firstPriorityCategoryPost in firstPriorityCategoryPosts"
+                                            :key="firstPriorityCategoryPost.id"
+                                            class="sidebar-tabs-item py-2 mb-4 border-b border-gray-200">
+                                            <Link
+                                                :href="route('frontend.blog.details', firstPriorityCategoryPost?.slug)"
                                                 class="font-bold py-2 text-lg text-gray-700 hover:text-indigo-700">
-                                                How to secure peace of mind and income that beats banks
-                                            </a>
+                                            {{ firstPriorityCategoryPost?.title }}
+                                            </Link>
                                             <div class="my-2 flex items-center justify-start gap-6">
-                                                <span class="text-yellow-500">10:29, Press Releases</span>
-                                                <span class="text-white bg-red-400 text-sm p-1">Technology</span>
+                                                <span class="text-yellow-500">{{
+                                                    formatPublishedAt(firstPriorityCategoryPost?.published_at,
+                                                        firstPriorityCategoryPost?.updated_at)
+                                                }}</span>
+                                                <span class="text-white bg-red-400 text-sm p-1">{{
+                                                    firstPriorityCategoryPost?.category?.name }}</span>
                                             </div>
                                         </div>
 
-                                        <div class="sidebar-tabs-item py-2 mb-4 border-b border-gray-200">
-                                            <a href=""
-                                                class="font-bold py-2 text-lg text-gray-700 hover:text-indigo-700">
-                                                Token Launch Date Announced for Dether, World’s First
-                                                Peer-To-Peer Ecosystem of Crypto Buyers, Sellers, and
-                                                Shops
-                                            </a>
-                                            <div class="my-2 flex items-center justify-start gap-6">
-                                                <span class="text-yellow-500">10:29, Press Releases</span>
-                                                <span class="text-white bg-red-800 text-sm p-1">Hot</span>
-                                            </div>
-                                        </div>
-
-                                        <div class="sidebar-tabs-item py-2 mb-4 border-b border-gray-200">
-                                            <a href=""
-                                                class="font-bold py-2 text-lg text-gray-700 hover:text-indigo-700">
-                                                Buffett Warns Investors That Safe-Looking Bonds Can Be
-                                                Risky
-                                            </a>
-                                            <div class="my-2 flex items-center justify-start gap-6">
-                                                <span class="text-yellow-500">10:29, Press Releases</span>
-                                                <span class="text-white bg-yellow-500 text-sm p-1">Gaming</span>
-                                            </div>
-                                        </div>
-
-                                        <div class="sidebar-tabs-item py-2 mb-4">
-                                            <a href=""
-                                                class="font-bold py-2 text-lg text-gray-700 hover:text-indigo-700">
-                                                Falls Below $16,400, Loses Nearly 15% in Major
-                                                Correction
-                                            </a>
-                                            <div class="my-2 flex items-center justify-start gap-6">
-                                                <span class="text-yellow-500">10:29, Press Releases</span>
-                                                <span class="text-white bg-indigo-600 text-sm p-1">Fashion</span>
-                                            </div>
-                                        </div>
                                     </div>
                                     <div class="hidden p-4 rounded-lg bg-gray-50 dark:bg-gray-800" id="styled-dashboard"
                                         role="tabpanel" aria-labelledby="dashboard-tab">
-                                        <div class="sidebar-tabs-item py-2 mb-4 border-b border-gray-200">
-                                            <a href=""
+                                        <div v-for="secondPriorityCategoryPost in secondPriorityCategoryPosts"
+                                            :key="secondPriorityCategoryPost.id"
+                                            class="sidebar-tabs-item py-2 mb-4 border-b border-gray-200">
+                                            <Link
+                                                :href="route('frontend.blog.details', secondPriorityCategoryPost?.slug)"
                                                 class="font-bold py-2 text-lg text-gray-700 hover:text-indigo-700">
-                                                Buffett Warns Investors That Safe-Looking Bonds Can Be
-                                                Risky
-                                            </a>
+                                            {{ secondPriorityCategoryPost?.title }}
+                                            </Link>
                                             <div class="my-2 flex items-center justify-start gap-6">
-                                                <span class="text-yellow-500">10:29, Press Releases</span>
-                                                <span class="text-white bg-yellow-500 text-sm p-1">Gaming</span>
+                                                <span class="text-yellow-500">
+                                                    {{
+                                                        formatPublishedAt(secondPriorityCategoryPost?.published_at,
+                                                            secondPriorityCategoryPost?.updated_at)
+                                                    }}
+                                                </span>
+                                                <span class="text-white bg-yellow-500 text-sm p-1">{{
+                                                    secondPriorityCategoryPost?.category?.name }}</span>
                                             </div>
                                         </div>
 
-                                        <div class="sidebar-tabs-item py-2 mb-4 border-b border-gray-200">
-                                            <a href=""
-                                                class="font-bold py-2 text-lg text-gray-700 hover:text-indigo-700">
-                                                Falls Below $16,400, Loses Nearly 15% in Major
-                                                Correction
-                                            </a>
-                                            <div class="my-2 flex items-center justify-start gap-6">
-                                                <span class="text-yellow-500">10:29, Press Releases</span>
-                                                <span class="text-white bg-indigo-600 text-sm p-1">Fashion</span>
-                                            </div>
-                                        </div>
-
-                                        <div class="sidebar-tabs-item py-2 mb-4 border-b border-gray-200">
-                                            <a href=""
-                                                class="font-bold py-2 text-lg text-gray-700 hover:text-indigo-700">
-                                                How to secure peace of mind and income that beats banks
-                                            </a>
-                                            <div class="my-2 flex items-center justify-start gap-6">
-                                                <span class="text-yellow-500">10:29, Press Releases</span>
-                                                <span class="text-white bg-red-500 text-sm p-1">Technology</span>
-                                            </div>
-                                        </div>
-
-                                        <div class="sidebar-tabs-item py-2 mb-4">
-                                            <a href=""
-                                                class="font-bold py-2 text-lg text-gray-700 hover:text-indigo-700">
-                                                Token Launch Date Announced for Dether, World’s First
-                                                Peer-To-Peer Ecosystem of Crypto Buyers, Sellers, and
-                                                Shops
-                                            </a>
-                                            <div class="my-2 flex items-center justify-start gap-6">
-                                                <span class="text-yellow-500">10:29, Press Releases</span>
-                                                <span class="text-white bg-red-800 text-sm p-1">Hot</span>
-                                            </div>
-                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -1628,3 +1717,55 @@ const sliderPosts = computed(() => page.props.sliderPosts ?? []);
     </Layout>
 
 </template>
+
+<style scoped>
+.swiper {
+    width: 100%;
+    height: 100%;
+}
+
+.swiper-slide {
+    text-align: center;
+    font-size: 18px;
+    background: transparent;
+
+    /* Center slide text vertically */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Ensure pagination is visible and positioned */
+.mySwiper :deep(.swiper-pagination) {
+    position: absolute !important;
+    bottom: 20px !important;
+    left: 90% !important;
+    transform: translateX(-50%) !important;
+    z-index: 10 !important;
+    display: flex !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    width: auto !important;
+}
+
+.mySwiper :deep(.swiper-pagination-bullet) {
+    width: 12px !important;
+    height: 12px !important;
+    background: rgba(255, 255, 255, 0.5) !important;
+    opacity: 1 !important;
+    border-radius: 50% !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    margin: 0 4px !important;
+}
+
+.mySwiper :deep(.swiper-pagination-bullet-active) {
+    background: #fff !important;
+    width: 14px !important;
+    height: 14px !important;
+}
+
+.mySwiper :deep(.swiper-pagination-bullet:hover) {
+    background: rgba(255, 255, 255, 0.8) !important;
+}
+</style>

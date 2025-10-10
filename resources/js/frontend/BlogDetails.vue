@@ -4,23 +4,52 @@ import "./assets/css/style.css";
 
 
 import hero1 from "./assets/images/hero-slider/banner-slider.jpg"
-
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
 import { Head, Link } from "@inertiajs/vue3";
 
-import { ref } from "vue";
+import { ref, defineProps } from "vue";
 
 import Layout from "./Layout.vue";
 
-// Simple slider state
-const currentSlide = ref(0);
-const goToSlide = (i) => {
-    currentSlide.value = i;
-    // If you have a track you want to translate, do it here with refs instead of document.getElementById
-};
+const props = defineProps({
+    post: {
+        type: Array,
+        default: () => []
+    },
+    categories: {
+        type: Array,
+        default: () => []
+    },
+    trendingPosts: {
+        type: Array,
+        default: () => []
+    },
+    firstPriorityCategory: {
+        type: Array,
+        default: () => []
+    },
+    firstPriorityCategoryPosts: {
+        type: Array,
+        default: () => []
+    },
+    secondPriorityCategory: {
+        type: Array,
+        default: () => []
+    },
+    secondPriorityCategoryPosts: {
+        type: Array,
+        default: () => []
+    },
 
-const mobileOpen = ref(false);
+});
 
-const toggleMobile = () => (mobileOpen.value = !mobileOpen.value);
+function formatPublishedAt(published, updated) {
+    if (!published) return ''
+    const formattedDate = dayjs(published).format('MMMM D, YYYY')
+    const updatedText = updated ? `, ${dayjs(updated).fromNow()}` : ''
+    return formattedDate + updatedText
+}
 
 </script>
 
@@ -28,6 +57,10 @@ const toggleMobile = () => (mobileOpen.value = !mobileOpen.value);
 
     <Head title="Blog Details" />
     <Layout>
+
+        <!-- <pre>
+            {{ props.categories }}
+        </pre> -->
 
         <main>
             <section class="news-section">
@@ -43,7 +76,8 @@ const toggleMobile = () => (mobileOpen.value = !mobileOpen.value);
                             <div class="flex flex-row items-center justify-end gap-4">
                                 <a href="javascript:void(0)" class="text-medium text-indigo-600">Home</a>
                                 <span class="text-white">/</span>
-                                <a href="javascript:void(0)" class="me-3 text-medium text-indigo-600">Blog</a>
+                                <Link :href="route('frontend.blog')" class="me-3 text-medium text-indigo-600">Blog
+                                </Link>
                                 <span class="text-white">/</span>
                                 <span class="me-3 text-medium text-gray-700">Blog Details</span>
                             </div>
@@ -61,48 +95,36 @@ const toggleMobile = () => (mobileOpen.value = !mobileOpen.value);
                         <!-- todo: Blog Details Page -->
                         <div class="bg-white px-4 py-6">
                             <div class="flex flex-wrap items-center justify-start gap-3 md:gap-5">
-                                <div class="">February 28, 2018</div>
+                                <div class="">{{ formatPublishedAt(post?.published_at, post?.updated_at) }}</div>
                                 <a href="javascript:void(0)"
                                     class="bg-indigo-500 text-white px-3 md:px-4 py-2 rounded-full transition-all duration-300 ease-in-out">
-                                    Post By: Al Sakib Ayon
+                                    Post By: {{ post?.author?.name }}
                                 </a>
                                 <a href="javascript:void(0)"
                                     class="bg-indigo-500 text-white px-3 md:px-4 py-2 rounded-full transition-all duration-300 ease-in-out">
-                                    Investing
+                                    {{ post?.category?.name }}
                                 </a>
                             </div>
 
                             <h3 class="py-6 font-bold text-4xl">
-                                Best Small Business Insurance Companies – and how to find them
+                                {{ post?.title }}
                             </h3>
 
                             <div class="">
-                                <img src="./assets/images/blog-details/blog-single-1.jpg" alt=""
-                                    class="w-full h-56 md:h-80 lg:h-96" />
+                                <img :src="post?.image" alt="" class="w-full h-56 md:h-80 lg:h-96" />
                             </div>
 
-                            <p class="py-3 text-md">
-                                Examining your Business Insurance may be worth Thousands , had
-                                life insurance cover that was taken out several years before
-                                Thursday the 29th. Most of the cover that I had was put in place
-                                through my IFA after my arguing to keep the cost down had been
-                                discussed into submission. Then one Thursday I began to feel
-                                ill. The proliferation of smartphones has connected people
-                                across the world, and by mid 2017, two thirds of the world's
-                                population had a mobile subscription – a total of 5 billion
-                                unique subscribers. By 2020, almost 860 million new subscribers
-                                will be added, taking the global penetration rate to 73%.
-                                However, with mobile subscriber growth slowing and competition
-                                intensifying, many telecom operators are questioning whether
-                                they've had the best of times and the future outlook may not be
-                                so promising. At this year's Global Mobile Broadband Forum (MBBF
-                                2017), held in London, the most influential decision makers from
-                                the ranks of operators, vendors and other participants in the
-                                mobile ecosystem gathered to explore how to achieve sustainable
-                                growth in the future.
-                            </p>
+                            <!-- <p class="py-3 text-md">
 
-                            <h4 class="font-bold text-xl text-indigo-600 py-2">
+                            </p> -->
+
+                            <br />
+
+                            <div v-html="post?.content"></div>
+
+                            <br />
+
+                            <!-- <h4 class="font-bold text-xl text-indigo-600 py-2">
                                 New mindset and thriving ecosystem drive future applications
                             </h4>
 
@@ -121,7 +143,7 @@ const toggleMobile = () => (mobileOpen.value = !mobileOpen.value);
                                 Business Insurance had always passed me by. By the end of the
                                 day I had found out that I was throwing away big bucks that I
                                 could ill afford to lose. Are you doing the same?
-                            </p>
+                            </p> -->
 
                             <div class="flex items-center justify-between">
                                 <div class="flex flex-wrap items-center justify-start gap-5">
@@ -363,55 +385,17 @@ const toggleMobile = () => (mobileOpen.value = !mobileOpen.value);
                         <div class="py-8">
                             <h3 class="font-medium text-2xl pb-6">Post Categories</h3>
                             <div class="">
-                                <div class="mb-6">
+
+                                <div v-for="category in props.categories" class="mb-6">
                                     <a href="javascript:void(0)" class="">
                                         <div
                                             class="w-full bg-gradient-to-r from-indigo-600 to-yellow-600 flex items-center justify-between py-3">
-                                            <span class="px-5 text-xl text-white">Business</span>
-                                            <span class="px-5 text-xl text-white">05</span>
+                                            <span class="px-5 text-xl text-white">{{ category?.name }}</span>
+                                            <span class="px-5 text-xl text-white">{{ category?.posts_count }}</span>
                                         </div>
                                     </a>
                                 </div>
 
-                                <div class="mb-6">
-                                    <a href="javascript:void(0)" class="">
-                                        <div
-                                            class="group w-full bg-white hover:bg-gradient-to-r from-indigo-600 to-yellow-600 flex items-center justify-between py-3 transition-all duration-300 ease-in-out">
-                                            <span class="px-5 text-xl group-hover:text-white">Finance & Business</span>
-                                            <span class="px-5 text-xl group-hover:text-white">05</span>
-                                        </div>
-                                    </a>
-                                </div>
-
-                                <div class="mb-6">
-                                    <a href="javascript:void(0)" class="">
-                                        <div
-                                            class="group w-full bg-white hover:bg-gradient-to-r from-indigo-600 to-yellow-600 flex items-center justify-between py-3 transition-all duration-300 ease-in-out">
-                                            <span class="px-5 text-xl group-hover:text-white">Technology</span>
-                                            <span class="px-5 text-xl group-hover:text-white">08</span>
-                                        </div>
-                                    </a>
-                                </div>
-
-                                <div class="mb-6">
-                                    <a href="javascript:void(0)" class="">
-                                        <div
-                                            class="group w-full bg-white hover:bg-gradient-to-r from-indigo-600 to-yellow-600 flex items-center justify-between py-3 transition-all duration-300 ease-in-out">
-                                            <span class="px-5 text-xl group-hover:text-white">Travel</span>
-                                            <span class="px-5 text-xl group-hover:text-white">07</span>
-                                        </div>
-                                    </a>
-                                </div>
-
-                                <div class="mb-6">
-                                    <a href="javascript:void(0)" class="">
-                                        <div
-                                            class="group w-full bg-white hover:bg-gradient-to-r from-indigo-600 to-yellow-600 flex items-center justify-between py-3 transition-all duration-300 ease-in-out">
-                                            <span class="px-5 text-xl group-hover:text-white">All News</span>
-                                            <span class="px-5 text-xl group-hover:text-white">09</span>
-                                        </div>
-                                    </a>
-                                </div>
                             </div>
                         </div>
 
@@ -421,62 +405,33 @@ const toggleMobile = () => (mobileOpen.value = !mobileOpen.value);
                                 Trending News
                             </h3>
                             <div class="">
-                                <div class="group trending-news-item bg-white my-6">
-                                    <a href="" class="m-0 p-0">
-                                        <div class="overflow-hidden">
-                                            <img src="./assets/images/trending-news/lnw-1.jpg" alt=""
-                                                class="w-full h-42 md:h-48 lg:h-42 2xl:h-64 group-hover:transform group-hover:scale-110 transition-all duration-300 ease-in-out" />
-                                        </div>
-                                        <div class="p-6">
-                                            <h3
-                                                class="text-lg font-bold group-hover:text-indigo-800 hover:text-indigo-800">
-                                                Envion – Digital Currency Mint in Exploits World’s
-                                                Lowest Cost Power
-                                            </h3>
-                                        </div>
-                                    </a>
-                                </div>
-                                <hr class="border-gray-300" />
-                                <div class="group trending-news-item bg-white my-6">
-                                    <a href="" class="m-0 p-0">
-                                        <div class="overflow-hidden">
-                                            <img src="./assets/images/trending-news/lnw-2.jpg" alt=""
-                                                class="w-full h-42 md:h-48 lg:h-42 2xl:h-64 group-hover:transform group-hover:scale-110 transition-all duration-300 ease-in-out" />
-                                        </div>
-                                        <div class="p-6">
-                                            <h3
-                                                class="text-lg font-bold group-hover:text-indigo-800 hover:text-indigo-800">
-                                                Bitcoin Cash Price Hits Record $2,500 to pierce $300
-                                                billion for the first time
-                                            </h3>
-                                        </div>
-                                    </a>
-                                </div>
-                                <hr class="border-gray-300" />
-                                <div class="group trending-news-item bg-white my-6">
-                                    <a href="" class="m-0 p-0">
-                                        <div class="overflow-hidden">
-                                            <img src="./assets/images/trending-news/lnw-3.jpg" alt=""
-                                                class="w-full h-42 md:h-48 lg:h-42 2xl:h-64 group-hover:transform group-hover:scale-110 transition-all duration-300 ease-in-out" />
-                                        </div>
-                                        <div class="p-6">
-                                            <h3
-                                                class="text-lg font-bold group-hover:text-indigo-800 hover:text-indigo-800">
-                                                HOLD the Kitten! New Year Gift for Every Crypto Cuttie
-                                            </h3>
-                                        </div>
-                                    </a>
+                                <div v-for="trendingPost in props.trendingPosts" :key="trendingPost.id"
+                                    class="group trending-news-item bg-white my-6">
+                                    <Link :href="route('frontend.blog.details', trendingPost?.slug)" class="m-0 p-0">
+                                    <div class="overflow-hidden">
+                                        <img :src="trendingPost?.thumbnail" alt=""
+                                            class="w-full h-42 md:h-48 lg:h-42 2xl:h-64 group-hover:transform group-hover:scale-110 transition-all duration-300 ease-in-out" />
+                                    </div>
+                                    <div class="p-6">
+                                        <h3 class="text-lg font-bold group-hover:text-indigo-800 hover:text-indigo-800">
+                                            {{ trendingPost?.title }}
+                                        </h3>
+                                    </div>
+                                    </Link>
+                                    <br />
+                                    <hr class="border-gray-300" />
                                 </div>
 
-                                <a href="javascript:void(0)" class="group">
+
+                                <!-- <a href="javascript:void(0)" class="group">
                                     <div
                                         class="p-4 bg-white text-center font-medium text-md group-hover:bg-indigo-600 group-hover:text-white transition-all duration-300 ease-in-out">
                                         Load More...
                                     </div>
-                                </a>
+                                </a> -->
                             </div>
 
-                            <div class="my-12">
+                            <!-- <div class="my-12">
                                 <div class="bg-white p-4">
                                     <div class="pb-3 mb-4 border-b border-gray-300">
                                         <a href="" class="font-bold text-xl hover:text-indigo-700">
@@ -507,18 +462,18 @@ const toggleMobile = () => (mobileOpen.value = !mobileOpen.value);
                                         <p class="py-2 text-yellow-500">11:45, Press Releases</p>
                                     </div>
                                 </div>
-                            </div>
+                            </div> -->
 
                             <!-- todo: Advertisment -->
-                            <div class="my-12 advertisment">
+                            <!-- <div class="my-12 advertisment">
                                 <a href="" class="">
                                     <img src="./assets/images/advertisement/advertisement-1.jpg" alt=""
                                         class="w-full h-auto" />
                                 </a>
-                            </div>
+                            </div> -->
 
                             <!-- todo: Video Blog -->
-                            <div class="my-12">
+                            <!-- <div class="my-12">
                                 <div class="watch-it-post-item col-span-1 md:col-span-1 overflow-hidden mb-6">
                                     <div class="group relative">
                                         <a href="" class="">
@@ -539,7 +494,6 @@ const toggleMobile = () => (mobileOpen.value = !mobileOpen.value);
                                             <span class="">3.16</span>
                                         </a>
                                     </div>
-                                    <!-- <br /> -->
                                     <div class="pt-3">
                                         <a href="javascript:void(0)"
                                             class="font-bold text-md md:text-xl hover:text-indigo-700">
@@ -548,33 +502,33 @@ const toggleMobile = () => (mobileOpen.value = !mobileOpen.value);
                                         </a>
                                     </div>
                                 </div>
-                            </div>
+                            </div> -->
 
                             <!-- todo: Social Media Links -->
                             <div class="social-media-links">
                                 <div class="flex flex-wrap items-center justify-between gap-2">
                                     <a href="javascript:void(0)"
-                                        class="facebook-icon w-13 h-13 text-white flex items-center justify-center">
+                                        class="facebook-icon w-12 h-12 text-white flex items-center justify-center">
                                         <i class="fa-brands fa-facebook-f text-lg"></i>
                                     </a>
                                     <a href="javascript:void(0)"
-                                        class="twitter-icon w-13 h-13 text-white flex items-center justify-center">
+                                        class="twitter-icon w-12 h-12 text-white flex items-center justify-center">
                                         <i class="fa-brands fa-twitter text-lg"></i>
                                     </a>
                                     <a href="javascript:void(0)"
-                                        class="pinterest-icon w-13 h-13 text-white flex items-center justify-center">
+                                        class="pinterest-icon w-12 h-12 text-white flex items-center justify-center">
                                         <i class="fa-brands fa-pinterest text-lg"></i>
                                     </a>
                                     <a href="javascript:void(0)"
-                                        class="linkedin-icon w-13 h-13 text-white flex items-center justify-center">
+                                        class="linkedin-icon w-12 h-12 text-white flex items-center justify-center">
                                         <i class="fa-brands fa-linkedin text-lg"></i>
                                     </a>
                                     <a href="javascript:void(0)"
-                                        class="google-plus-icon w-13 h-13 text-white flex items-center justify-center">
+                                        class="google-plus-icon w-12 h-12 text-white flex items-center justify-center">
                                         <i class="fa-brands fa-google-plus-g text-lg"></i>
                                     </a>
                                     <a href="javascript:void(0)"
-                                        class="instagram-icon w-13 h-13 text-white flex items-center justify-center">
+                                        class="instagram-icon w-12 h-12 text-white flex items-center justify-center">
                                         <i class="fa-brands fa-instagram text-lg"></i>
                                     </a>
                                 </div>
@@ -593,7 +547,7 @@ const toggleMobile = () => (mobileOpen.value = !mobileOpen.value);
                                                 class="inline-block p-2 text-lg rounded-t-lg cursor-pointer text-white group-hover:text-white group-active:text-white group-focus:text-white"
                                                 id="profile-styled-tab" data-tabs-target="#styled-profile" type="button"
                                                 role="tab" aria-controls="profile" aria-selected="false">
-                                                Technology
+                                                {{ firstPriorityCategory?.name }}
                                             </button>
                                         </li>
                                         <li class="group col-span-1 bg-yellow-600 hover:bg-yellow-800 cursor-pointer text-white"
@@ -603,7 +557,7 @@ const toggleMobile = () => (mobileOpen.value = !mobileOpen.value);
                                                 id="dashboard-styled-tab" data-tabs-target="#styled-dashboard"
                                                 type="button" role="tab" aria-controls="dashboard"
                                                 aria-selected="false">
-                                                Gaming
+                                                {{ secondPriorityCategory?.name }}
                                             </button>
                                         </li>
                                     </ul>
@@ -611,101 +565,40 @@ const toggleMobile = () => (mobileOpen.value = !mobileOpen.value);
                                 <div id="default-styled-tab-content">
                                     <div class="hidden p-4 rounded-lg bg-gray-50 dark:bg-gray-800" id="styled-profile"
                                         role="tabpanel" aria-labelledby="profile-tab">
-                                        <div class="sidebar-tabs-item py-2 mb-4 border-b border-gray-200">
-                                            <a href=""
+
+                                        <div v-for="firstPriorityCategoryPost in props.firstPriorityCategoryPosts"
+                                            class="sidebar-tabs-item py-2 mb-4 border-b border-gray-200">
+                                            <a :href="route('frontend.blog.details', firstPriorityCategoryPost?.slug)"
                                                 class="font-bold py-2 text-lg text-gray-700 hover:text-indigo-700">
-                                                How to secure peace of mind and income that beats banks
+                                                {{ firstPriorityCategoryPost?.title }}
                                             </a>
                                             <div class="my-2 flex items-center justify-start gap-6">
-                                                <span class="text-yellow-500">10:29, Press Releases</span>
-                                                <span class="text-white bg-red-400 text-sm p-1">Technology</span>
+                                                <span class="text-yellow-500">{{
+                                                    formatPublishedAt(firstPriorityCategoryPost?.published_at,
+                                                        firstPriorityCategoryPost?.updated_at) }}</span>
+                                                <span class="text-white bg-red-400 text-sm p-1">{{
+                                                    firstPriorityCategoryPost?.category?.name }}</span>
                                             </div>
                                         </div>
 
-                                        <div class="sidebar-tabs-item py-2 mb-4 border-b border-gray-200">
-                                            <a href=""
-                                                class="font-bold py-2 text-lg text-gray-700 hover:text-indigo-700">
-                                                Token Launch Date Announced for Dether, World’s First
-                                                Peer-To-Peer Ecosystem of Crypto Buyers, Sellers, and
-                                                Shops
-                                            </a>
-                                            <div class="my-2 flex items-center justify-start gap-6">
-                                                <span class="text-yellow-500">10:29, Press Releases</span>
-                                                <span class="text-white bg-red-800 text-sm p-1">Hot</span>
-                                            </div>
-                                        </div>
-
-                                        <div class="sidebar-tabs-item py-2 mb-4 border-b border-gray-200">
-                                            <a href=""
-                                                class="font-bold py-2 text-lg text-gray-700 hover:text-indigo-700">
-                                                Buffett Warns Investors That Safe-Looking Bonds Can Be
-                                                Risky
-                                            </a>
-                                            <div class="my-2 flex items-center justify-start gap-6">
-                                                <span class="text-yellow-500">10:29, Press Releases</span>
-                                                <span class="text-white bg-yellow-500 text-sm p-1">Gaming</span>
-                                            </div>
-                                        </div>
-
-                                        <div class="sidebar-tabs-item py-2 mb-4">
-                                            <a href=""
-                                                class="font-bold py-2 text-lg text-gray-700 hover:text-indigo-700">
-                                                Falls Below $16,400, Loses Nearly 15% in Major
-                                                Correction
-                                            </a>
-                                            <div class="my-2 flex items-center justify-start gap-6">
-                                                <span class="text-yellow-500">10:29, Press Releases</span>
-                                                <span class="text-white bg-indigo-600 text-sm p-1">Fashion</span>
-                                            </div>
-                                        </div>
                                     </div>
                                     <div class="hidden p-4 rounded-lg bg-gray-50 dark:bg-gray-800" id="styled-dashboard"
                                         role="tabpanel" aria-labelledby="dashboard-tab">
-                                        <div class="sidebar-tabs-item py-2 mb-4 border-b border-gray-200">
-                                            <a href=""
+                                        <div v-for="secondPriorityCategoryPost in props.secondPriorityCategoryPosts"
+                                            class="sidebar-tabs-item py-2 mb-4">
+                                            <Link
+                                                :href="route('frontend.blog.details', secondPriorityCategoryPost?.slug)"
                                                 class="font-bold py-2 text-lg text-gray-700 hover:text-indigo-700">
-                                                Buffett Warns Investors That Safe-Looking Bonds Can Be
-                                                Risky
-                                            </a>
+                                            {{ secondPriorityCategoryPost?.title }}
+                                            </Link>
                                             <div class="my-2 flex items-center justify-start gap-6">
-                                                <span class="text-yellow-500">10:29, Press Releases</span>
-                                                <span class="text-white bg-yellow-500 text-sm p-1">Gaming</span>
-                                            </div>
-                                        </div>
-
-                                        <div class="sidebar-tabs-item py-2 mb-4 border-b border-gray-200">
-                                            <a href=""
-                                                class="font-bold py-2 text-lg text-gray-700 hover:text-indigo-700">
-                                                Falls Below $16,400, Loses Nearly 15% in Major
-                                                Correction
-                                            </a>
-                                            <div class="my-2 flex items-center justify-start gap-6">
-                                                <span class="text-yellow-500">10:29, Press Releases</span>
-                                                <span class="text-white bg-indigo-600 text-sm p-1">Fashion</span>
-                                            </div>
-                                        </div>
-
-                                        <div class="sidebar-tabs-item py-2 mb-4 border-b border-gray-200">
-                                            <a href=""
-                                                class="font-bold py-2 text-lg text-gray-700 hover:text-indigo-700">
-                                                How to secure peace of mind and income that beats banks
-                                            </a>
-                                            <div class="my-2 flex items-center justify-start gap-6">
-                                                <span class="text-yellow-500">10:29, Press Releases</span>
-                                                <span class="text-white bg-red-500 text-sm p-1">Technology</span>
-                                            </div>
-                                        </div>
-
-                                        <div class="sidebar-tabs-item py-2 mb-4">
-                                            <a href=""
-                                                class="font-bold py-2 text-lg text-gray-700 hover:text-indigo-700">
-                                                Token Launch Date Announced for Dether, World’s First
-                                                Peer-To-Peer Ecosystem of Crypto Buyers, Sellers, and
-                                                Shops
-                                            </a>
-                                            <div class="my-2 flex items-center justify-start gap-6">
-                                                <span class="text-yellow-500">10:29, Press Releases</span>
-                                                <span class="text-white bg-red-800 text-sm p-1">Hot</span>
+                                                <span class="text-yellow-500">
+                                                    {{
+                                                        formatPublishedAt(secondPriorityCategoryPost?.published_at,
+                                                            secondPriorityCategoryPost?.updated_at) }}
+                                                </span>
+                                                <span class="text-white bg-red-800 text-sm p-1">{{
+                                                    secondPriorityCategoryPost?.category?.name }}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -725,11 +618,11 @@ const toggleMobile = () => (mobileOpen.value = !mobileOpen.value);
                     Topics
                 </h3>
                 <div class="grid grid-cols-3 gap-4">
-                    <a href="javascript:void(0)"
+                    <a v-for="category in props.categories" href="javascript:void(0)"
                         class="bg-gray-200/60 rounded-full py-3 px-3 text-center hover:bg-gradient-to-r hover:from-yellow-600 hover:to-indigo-600 hover:text-white transition-all duration-300 ease-in-out mb-3">
-                        <div class="text-medium text-xl">Fashion</div>
+                        <div class="text-medium text-xl">{{ category?.name }}</div>
                     </a>
-                    <a href="javascript:void(0)"
+                    <!-- <a href="javascript:void(0)"
                         class="bg-gray-200/60 rounded-full py-3 px-3 text-center hover:bg-gradient-to-r hover:from-yellow-600 hover:to-indigo-600 hover:text-white transition-all duration-300 ease-in-out mb-3">
                         <div class="text-medium text-xl">Technology</div>
                     </a>
@@ -760,7 +653,7 @@ const toggleMobile = () => (mobileOpen.value = !mobileOpen.value);
                     <a href="javascript:void(0)"
                         class="bg-gray-200/60 rounded-full py-3 px-3 text-center hover:bg-gradient-to-r hover:from-yellow-600 hover:to-indigo-600 hover:text-white transition-all duration-300 ease-in-out mb-3">
                         <div class="text-medium text-xl">Architech</div>
-                    </a>
+                    </a> -->
                 </div>
             </div>
         </section>

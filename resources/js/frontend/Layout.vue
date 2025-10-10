@@ -65,7 +65,12 @@ const categories = computed(() => page.props.categories ?? []);
                                     <span class="sr-only">Search icon</span>
                                 </div>
                             </div>
-                            <button data-collapse-toggle="navbar-search" type="button"
+                            <div class="p-3">
+                                <a href="/login" class="">
+                                    <i class="fas fa-user"></i>
+                                </a>
+                            </div>
+                            <button data-collapse-toggle=" navbar-search" type="button"
                                 class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
                                 aria-controls="navbar-search" aria-expanded="false">
                                 <span class="sr-only">Open main menu</span>
@@ -133,14 +138,18 @@ const categories = computed(() => page.props.categories ?? []);
                                         class="block py-2 px-3 text-white bg-blue-700 rounded-sm md:bg-transparent md:text-blue-700 md:p-0 md:dark:text-blue-500 text-sm md:text-md"
                                         aria-current="page">HOME</Link>
                                 </li>
-
+                                <li>
+                                    <Link :href="route('frontend.blog')"
+                                        class="block py-2 px-3 text-gray-900 rounded-sm hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 md:dark:hover:text-blue-500 dark:text-white dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700 text-sm md:text-md">
+                                    BLOG</Link>
+                                </li>
                                 <li>
                                     <Link :href="route('frontend.about')"
                                         class="block py-2 px-3 text-gray-900 rounded-sm hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 md:dark:hover:text-blue-500 dark:text-white dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700 text-sm md:text-md">
                                     ABOUT
                                     US</Link>
                                 </li>
-                                <li>
+                                <!-- <li>
                                     <button id="dropdownNavbarLink" data-dropdown-toggle="dropdownNavbar"
                                         class="flex items-center justify-between w-full py-2 px-3 text-gray-900 rounded-sm hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 md:w-auto dark:text-white md:dark:hover:text-blue-500 dark:focus:text-white dark:border-gray-700 dark:hover:bg-gray-700 md:dark:hover:bg-transparent text-sm md:text-md">
                                         CATEGORY
@@ -150,7 +159,6 @@ const categories = computed(() => page.props.categories ?? []);
                                                 stroke-width="2" d="m1 1 4 4 4-4" />
                                         </svg>
                                     </button>
-                                    <!-- Dropdown menu -->
                                     <div id="dropdownNavbar"
                                         class="z-10 hidden font-normal bg-white divide-y divide-gray-100 rounded-lg shadow-md w-[93%] md:w-56 dark:bg-gray-700 dark:divide-gray-600">
                                         <ul class="py-2 text-sm text-gray-700 dark:text-gray-400"
@@ -162,12 +170,8 @@ const categories = computed(() => page.props.categories ?? []);
                                             </li>
                                         </ul>
                                     </div>
-                                </li>
-                                <li>
-                                    <Link :href="route('frontend.blog')"
-                                        class="block py-2 px-3 text-gray-900 rounded-sm hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 md:dark:hover:text-blue-500 dark:text-white dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700 text-sm md:text-md">
-                                    BLOG</Link>
-                                </li>
+                                </li> -->
+
                                 <li>
                                     <Link :href="route('frontend.contact')"
                                         class="block py-2 px-3 text-gray-900 rounded-sm hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700 text-sm md:text-md">

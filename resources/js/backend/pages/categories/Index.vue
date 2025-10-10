@@ -77,7 +77,7 @@ function destroyCategory(id) {
                     <BaseButton color="info" :icon="mdiEye" :label="AddCategory" :href="categories.create" small
                         @click="isModalActive = true" />
                 </BaseButtons> -->
-                <Link :href="categories.create || '/categories/create'"
+                <Link :href="props.categories?.create || '/categories/create'"
                     class="px-4 py-2 rounded bg-indigo-700 text-white cursor-pointer">Add
                 Category</Link>
             </div>
@@ -89,7 +89,8 @@ function destroyCategory(id) {
                         <tr>
                             <th v-if="checkable" />
                             <th />
-                            <th>SL</th>
+                            <!-- <th>SL</th> -->
+                            <th>Priority</th>
                             <th>Category Name</th>
                             <th>Category Image</th>
                             <th>Action</th>
@@ -101,8 +102,11 @@ function destroyCategory(id) {
                             <td class="border-b-0 lg:w-6 before:hidden">
                                 <UserAvatar :username="category.name" class="w-24 h-24 mx-auto lg:w-6 lg:h-6" />
                             </td>
-                            <td data-label="SL">
+                            <!-- <td data-label="SL">
                                 {{ index + 1 }}
+                            </td> -->
+                            <td data-label="Priority">
+                                {{ category?.priority || 'N/A' }}
                             </td>
                             <td data-label="Name">
                                 {{ category?.name || 'N/A' }}

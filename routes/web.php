@@ -4,7 +4,9 @@ use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Application;
 use App\Http\Controllers\Backend\TagController;
+use App\Http\Controllers\Backend\NewsController;
 use App\Http\Controllers\Backend\PostController;
+use App\Http\Controllers\Backend\AboutController;
 use App\Http\Controllers\Backend\CategoryController;
 
 // Route::get('/', function () {
@@ -53,6 +55,25 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         'edit' => 'posts.edit',
         'update' => 'posts.update',
         'destroy' => 'posts.destroy'
+    ]);
+
+    Route::resource('news', NewsController::class)->names([
+        'index' => 'news.index',
+        'create' => 'news.create',
+        'store' => 'news.store',
+        'show' => 'news.show',
+        'edit' => 'news.edit',
+        'update' => 'news.update',
+        'destroy' => 'news.destroy'
+    ]);
+
+    Route::resource('about', AboutController::class)->names([
+        'index' => 'about.index',
+        // 'create' => 'news.create',
+        // 'store' => 'news.store',
+        // 'show' => 'news.show',
+        // 'edit' => 'about.edit',
+        'update' => 'about.update',
     ]);
 
 });

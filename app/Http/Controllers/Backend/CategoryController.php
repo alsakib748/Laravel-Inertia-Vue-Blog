@@ -13,7 +13,7 @@ class CategoryController extends Controller
 
     public function index()
     {
-        $categories = Category::latest()->paginate(10);
+        $categories = Category::orderBy('priority', 'asc')->paginate(10);
         $categories->create = route('categories.create');
 
         // $routes = [
@@ -35,12 +35,14 @@ class CategoryController extends Controller
         // dd($request->all());
 
         $request->validate([
+            'priority' => 'required|integer',
             'name' => 'required|string|max:255|unique:categories,name',
             'description' => 'nullable|string|max:5000', // Increased for rich text content
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         $category = new Category();
+        $category->priority = $request->priority;
         $category->name = $request->name;
         $category->slug = Str::slug($request->name);
         $category->description = $request->description;
@@ -85,12 +87,14 @@ class CategoryController extends Controller
         // dd($request->all());
 
         $request->validate([
+            'priority' => 'required|integer',
             'name' => 'required|string|max:255|unique:categories,name,' . $category->id,
             'description' => 'nullable|string', // Increased for rich text content
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
         $category = Category::find($request->id);
+        $category->priority = $request->priority;
         $category->name = $request->name;
         $category->slug = Str::slug($request->name);
         $category->description = $request->description;

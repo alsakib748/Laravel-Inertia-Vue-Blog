@@ -11,7 +11,7 @@ Route::get('/', function () {
 
 Route::controller(FrontendController::class)->group(function () {
     Route::get('/', 'home')->name('frontend.home');
-    Route::get('/about', 'about')->name('frontend.about');
+    Route::get('/about-us', 'about')->name('frontend.about');
     Route::get('/blog', 'blog')->name('frontend.blog');
     Route::get('/blog/{slug}', 'blogDetails')->name('frontend.blog.details');
     Route::get('/contact', 'contact')->name('frontend.contact');

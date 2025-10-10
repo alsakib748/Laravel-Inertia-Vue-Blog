@@ -94,7 +94,7 @@ function destroyPost(id) {
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="(post, index) in posts.data" :key="post?.id || index">
+                        <tr v-for="(post, index) in props.posts.data" :key="post?.id || index">
                             <TableCheckboxCell v-if="checkable" @checked="checked($event, post)" />
                             <td class="border-b-0 lg:w-6 before:hidden">
                                 <UserAvatar :username="post?.title" class="w-24 h-24 mx-auto lg:w-6 lg:h-6" />

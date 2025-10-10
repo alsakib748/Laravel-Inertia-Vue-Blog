@@ -30,7 +30,7 @@ class AppServiceProvider extends ServiceProvider
                     fn() =>
                     Category::query()
                         ->where('status', 1)
-                        ->orderBy('name')
+                        ->orderBy('priority', 'asc')
                         ->pluck('name', 'slug')
                 )
         ]);
